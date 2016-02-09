@@ -37,24 +37,16 @@ class MediaDBus(object):
     """a wrapper for dbus"""
     def __init__(self, arg):
         self.arg = arg
-        self.currentTitle = "My wonderful track"
-        self.nextTitle = "Next wonderful track"
+        self.current_title = "My wonderful track"
+        self.next_title = "Next wonderful track"
 
-    def getCurrentTitle(self):
+    def get_current_title(self):
         """returns the title of the current track"""
-        return self.currentTitle
+        return self.current_title
 
-    def getNextTitle(self):
+    def get_next_title(self):
         """returns the title of the next track"""
-        return self.nextTitle
-
-
-class Client(object):
-    """
-    An object to store the connected clients
-    """
-    def __init__(self, socket):
-        self.socket = socket
+        return self.next_title
 
 
 class WebSocket(tornado.websocket.WebSocketHandler):
@@ -63,26 +55,26 @@ class WebSocket(tornado.websocket.WebSocketHandler):
     """
     def open(self):
         """when a client connects, add this socket to list"""
+        APP.clients.append(self)
+        self.send_status()
         print("WebSocket opened")
-        self.client = Client(socket=self)
-        APP.clients.append(self.client)
-        msg = {
-            "current": APP.mediadbus.getCurrentTitle(),
-            "next": APP.mediadbus.getNextTitle(),
-        }
-        for client in APP.clients:
-            client.socket.send(json.dumps(msg))
 
     def on_message(self, message):
         """new message received"""
         print("received: " + message)
 
-    def send(self, message):
-        """send a message to my client"""
-        print("send: " + message)  # TODO
+    def send_status(self):
+        """sends the current and next tracks to the client"""
+        msg = {
+            "current": APP.mediadbus.get_current_title(),
+            "next": APP.mediadbus.get_next_title(),
+        }
+        self.write_message(json.dumps(msg), binary=False)
+        print("send: {0}".format(msg))
 
     def on_close(self):
         """the client of this socket leaved, remove this socket from list"""
+        APP.clients.remove(self)
         print("WebSocket closed")
 
 
