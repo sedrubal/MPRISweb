@@ -1,0 +1,38 @@
+html {
+	background-color: #2A2730;
+}
+body {
+	background-color: #2A2730;
+}
+footer {
+	text-align:center;
+	margin-top: 1em;
+	margin-bottom: 0;
+	padding: 5em;
+	color: #99979C;
+	background-color: #2A2730;
+	width: 100%;
+	bottom: 0px;
+}
+footer a {
+	color: #fff;
+}
+footer a:hover {
+	color: #fff;
+}
+
+.titles{
+  transition: margin-left 1s, opacity 1s;
+  margin-left: 0px;
+  opacity: 1;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.titles.fadeout {
+  margin-left: 100px;
+  opacity: 0;
+}
+.titles.fadein {
+  margin-left: 100px;
+  opacity: 0;
+}
