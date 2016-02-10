@@ -5,8 +5,6 @@
 Control your musicplayer through the web.
 """
 
-from __future__ import print_function
-
 __project__ = "MPRISweb"
 __authors__ = "sedrubal"
 __email__ = "sebastian.endres@online.de",
@@ -17,18 +15,9 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 import os
-import sys
 import json
 from mpriswrapper import MPRISWrapper
-
-
-def log(msg, min_verbosity=0, error=False):
-    """log to stdout, if verbosity >= min_verbosity"""
-    if APP.verbosity >= min_verbosity:
-        print(
-            ('[!] {0}' if error else '[i] {0}').format(msg),
-            file=sys.stderr if error else sys.stdout
-        )
+from helpers import log, set_verbosity
 
 
 class StartPage(tornado.web.RequestHandler):
@@ -105,6 +94,13 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         pass
 
 
+def mpris_prop_change_handler(*args, **kw):
+    """function will be executed on mpris player property changes"""
+    log("MPRIS status changed: {0} {1}".format(args, kw), min_verbosity=1)
+    for client in APP.clients:
+        client.send_status()
+
+
 SETTINGS = {
     "template_path": os.path.join(os.path.dirname(__file__), "templates"),
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
@@ -122,8 +118,8 @@ def make_app():
 
 if __name__ == "__main__":
     APP = make_app()
-    APP.listen(8888)
-    APP.mpris_wrapper = MPRISWrapper("TODO")
+    set_verbosity(5)  # TODO argparse
     APP.clients = []  # global list of all connected websocket clients
-    APP.verbosity = 5  # TODO argparse
+    APP.mpris_wrapper = MPRISWrapper(mpris_prop_change_handler)
+    APP.listen(8888)
     tornado.ioloop.IOLoop.current().start()
