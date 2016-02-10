@@ -5,10 +5,11 @@
 Control your musicplayer through the web.
 """
 
+__project__ = "MPRISweb"
 __authors__ = "sedrubal"
 __email__ = "sebastian.endres@online.de",
 __license__ = "GPLv3 & non military"
-__url__ = "https://github.com/sedrubal/dbusmediaweb"
+__url__ = "https://github.com/sedrubal/" + __project__.lower()
 
 
 import tornado.ioloop
@@ -25,7 +26,7 @@ class StartPage(tornado.web.RequestHandler):
     def get(self):
         """the handler for get requests"""
         self.render("index.html",
-                    title="DBusMediaWeb",
+                    title=__project__,
                     description=__doc__,
                     author=__authors__,
                     license=__license__,
@@ -33,8 +34,8 @@ class StartPage(tornado.web.RequestHandler):
                     authors_url='/'.join(__url__.split('/')[:-1]))
 
 
-class MediaDBus(object):
-    """a wrapper for dbus"""
+class MPRISWrapper(object):
+    """a wrapper for mpris"""
     def __init__(self, arg):
         self.arg = arg
         self.current_title = "My wonderful track"
@@ -66,8 +67,8 @@ class WebSocket(tornado.websocket.WebSocketHandler):
     def send_status(self):
         """sends the current and next tracks to the client"""
         msg = {
-            "current": APP.mediadbus.get_current_title(),
-            "next": APP.mediadbus.get_next_title(),
+            "current": APP.mpris_wrapper.get_current_title(),
+            "next": APP.mpris_wrapper.get_next_title(),
         }
         self.write_message(json.dumps(msg), binary=False)
         print("send: {0}".format(msg))
@@ -96,6 +97,6 @@ def make_app():
 if __name__ == "__main__":
     APP = make_app()
     APP.listen(8888)
-    APP.mediadbus = MediaDBus("TODO")
+    APP.mpris_wrapper = MPRISWrapper("TODO")
     APP.clients = []  # global list of all connected websocket clients
     tornado.ioloop.IOLoop.current().start()

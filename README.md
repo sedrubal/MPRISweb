@@ -1,7 +1,10 @@
-DBusMediaWeb
-============
+MPRISweb
+========
 
 Control your musicplayer through the web.
+-----------------------------------------
+
+A simple webinterface for MPRIS using tornado.
 
 Usage
 -----
@@ -13,7 +16,7 @@ Usage
 Features
 --------
 
- - dbus
+ - MPRIS
  - websockets
  - python3
  - tornado
