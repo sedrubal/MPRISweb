@@ -33,6 +33,10 @@ class StartPage(tornado.web.RequestHandler):
                     url=__url__,
                     authors_url='/'.join(__url__.split('/')[:-1]))
 
+    def data_received(self, chunk):
+        """override abstract method"""
+        pass
+
 
 class MPRISWrapper(object):
     """a wrapper for mpris"""
@@ -77,6 +81,10 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         """the client of this socket leaved, remove this socket from list"""
         APP.clients.remove(self)
         print("WebSocket closed")
+
+    def data_received(self, chunk):
+        """override abstract method"""
+        pass
 
 
 SETTINGS = {
