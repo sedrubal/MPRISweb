@@ -1,4 +1,6 @@
 var ws;
+var currentTitle = document.getElementById("current")
+var nextTitle = document.getElementById("next")
 
 var url = "ws://localhost:8888/websocket";
 
@@ -14,7 +16,7 @@ function connect(url) {
 		ws.onopen = onopen;
 		ws.onmessage = onmessage;
 		ws.onclose = onclose;
-		ws.onerror = function (error) { // TODO
+		ws.onerror = function (error) { // TODO reconnect
 			console.log('WebSocket Error ' + error);
 		};
 	}
@@ -24,7 +26,14 @@ function onopen() {
 };
 
 function onmessage(evt) {
-	message = JSON.parse(evt.data);
+	var message = JSON.parse(evt.data);
+  console.log(message)
+  if (message.current != undefined) {
+    currentTitle.innerHTML = message.current;
+  }
+  if (message.next != undefined) {
+    nextTitle.innerHTML = message.next;
+  }
 };
 
 function onclose() {
@@ -43,10 +52,10 @@ function send(action) {
 function backward() {
   send("backward");
   // DEBUG:
-  var titles = document.getElementsByClassName('titles');
-  for (var i = 0, l = titles.length; i < l; i++) {
-    titles[i].classList.add('fadeout');
-  }
+  // var titles = document.getElementsByClassName('titles');
+  // for (var i = 0, l = titles.length; i < l; i++) {
+  //   titles[i].classList.add('fadeout');
+  // }
 }
 
 function play() {
@@ -60,18 +69,18 @@ function pause() {
 function forward() {
   send("forward");
   // DEBUG:
-  var titles = document.getElementsByClassName('titles');
-  for (var i = 0, l = titles.length; i < l; i++) {
-    titles[i].classList.add('fadein');
-  }
+  // var titles = document.getElementsByClassName('titles');
+  // for (var i = 0, l = titles.length; i < l; i++) {
+  //   titles[i].classList.add('fadein');
+  // }
 }
 
 function stop() {
   send("stop");
   // DEBUG:
-  var titles = document.getElementsByClassName('titles');
-  for (var i = 0, l = titles.length; i < l; i++) {
-    titles[i].classList.remove('fadein');
-    titles[i].classList.remove('fadeout');
-  }
+  // var titles = document.getElementsByClassName('titles');
+  // for (var i = 0, l = titles.length; i < l; i++) {
+  //   titles[i].classList.remove('fadein');
+  //   titles[i].classList.remove('fadeout');
+  // }
 }

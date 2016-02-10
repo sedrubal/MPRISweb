@@ -5,18 +5,30 @@
 Control your musicplayer through the web.
 """
 
+from __future__ import print_function
+
 __project__ = "MPRISweb"
 __authors__ = "sedrubal"
 __email__ = "sebastian.endres@online.de",
 __license__ = "GPLv3 & non military"
 __url__ = "https://github.com/sedrubal/" + __project__.lower()
 
-
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
 import os
+import sys
 import json
+from mpriswrapper import MPRISWrapper
+
+
+def log(msg, min_verbosity=0, error=False):
+    """log to stdout, if verbosity >= min_verbosity"""
+    if APP.verbosity >= min_verbosity:
+        print(
+            ('[!] {0}' if error else '[i] {0}').format(msg),
+            file=sys.stderr if error else sys.stdout
+        )
 
 
 class StartPage(tornado.web.RequestHandler):
@@ -38,22 +50,6 @@ class StartPage(tornado.web.RequestHandler):
         pass
 
 
-class MPRISWrapper(object):
-    """a wrapper for mpris"""
-    def __init__(self, arg):
-        self.arg = arg
-        self.current_title = "My wonderful track"
-        self.next_title = "Next wonderful track"
-
-    def get_current_title(self):
-        """returns the title of the current track"""
-        return self.current_title
-
-    def get_next_title(self):
-        """returns the title of the next track"""
-        return self.next_title
-
-
 class WebSocket(tornado.websocket.WebSocketHandler):
     """
     The websocket server part
@@ -62,11 +58,33 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         """when a client connects, add this socket to list"""
         APP.clients.append(self)
         self.send_status()
-        print("WebSocket opened")
+        log("WebSocket opened", min_verbosity=1)
 
     def on_message(self, message):
         """new message received"""
-        print("received: " + message)
+        try:
+            msg = json.loads(message)
+        except ValueError:
+            log("Client sent an invalid message: {0}".format(message),
+                error=True)
+            return
+        if not msg['action']:
+            return
+        elif msg['action'] == 'backward':
+            APP.mpris_wrapper.previous()
+        elif msg['action'] == 'play':
+            APP.mpris_wrapper.play()
+        elif msg['action'] == 'pause':
+            APP.mpris_wrapper.pause()
+        elif msg['action'] == 'stop':
+            APP.mpris_wrapper.stop()
+        elif msg['action'] == 'forward':
+            APP.mpris_wrapper.next()
+        else:
+            log("invalid action '{0}' received by client".
+                format(msg['action']),
+                error=True)
+        log("received: " + message, min_verbosity=1)
 
     def send_status(self):
         """sends the current and next tracks to the client"""
@@ -75,12 +93,12 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             "next": APP.mpris_wrapper.get_next_title(),
         }
         self.write_message(json.dumps(msg), binary=False)
-        print("send: {0}".format(msg))
+        log("send: {0}".format(msg), min_verbosity=1)
 
     def on_close(self):
         """the client of this socket leaved, remove this socket from list"""
         APP.clients.remove(self)
-        print("WebSocket closed")
+        log("WebSocket closed", min_verbosity=1)
 
     def data_received(self, chunk):
         """override abstract method"""
@@ -107,4 +125,5 @@ if __name__ == "__main__":
     APP.listen(8888)
     APP.mpris_wrapper = MPRISWrapper("TODO")
     APP.clients = []  # global list of all connected websocket clients
+    APP.verbosity = 5  # TODO argparse
     tornado.ioloop.IOLoop.current().start()
