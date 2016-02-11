@@ -1,39 +1,39 @@
 var ws;
-var titlesjumbo = document.getElementById("titlesjumbo")
-var currentTitle = document.getElementById("current")
-var nextTitle = document.getElementById("next")
+var titlesjumbo = document.getElementById("titlesjumbo");
+var currentTitle = document.getElementById("current");
+var nextTitle = document.getElementById("next");
 // media buttons
-var backwardbtn = document.getElementById("backward-btn")
-var playbtn = document.getElementById("play-btn")
-var pausebtn = document.getElementById("pause-btn")
-var stopbtn = document.getElementById("stop-btn")
-var forwardbtn = document.getElementById("forward-btn")
+var backwardbtn = document.getElementById("backward-btn");
+var playbtn = document.getElementById("play-btn");
+var pausebtn = document.getElementById("pause-btn");
+var stopbtn = document.getElementById("stop-btn");
+var forwardbtn = document.getElementById("forward-btn");
 // status
 var statusbadges = document.getElementsByClassName("statusbadge");
 
 var wsurl = document.URL.replace(/^http/g, 'ws').replace(/\/$/g, '') + wsurl;
-console.log ("Websocket URL is " + wsurl);
+console.log("Websocket URL is " + wsurl);
 
 document.onload = connect(wsurl);
 window.onload = preloadImages();
 window.onbeforeunload = function() {
-	ws = undefined; // don't reconnect while reloading page
+  ws = undefined; // don't reconnect while reloading page
 };
 
 
 function connect(wsurl) {
-	if (ws == undefined || ws.readyState == ws.CLOSED)	 {
-		ws = new WebSocket(wsurl);
-		ws.onopen = onopen;
-		ws.onmessage = onmessage;
-		ws.onclose = onclose;
-		ws.onerror = function (error) {
-			console.log('WebSocket Error ' + error);
+  if (ws == undefined || ws.readyState == ws.CLOSED) {
+    ws = new WebSocket(wsurl);
+    ws.onopen = onopen;
+    ws.onmessage = onmessage;
+    ws.onclose = onclose;
+    ws.onerror = function (error) {
+      console.log('WebSocket Error ' + error);
       update_status();
-		};
+    };
     console.log("Connected");
     update_status();
-	}
+  }
 }
 
 function onopen() {
@@ -41,7 +41,7 @@ function onopen() {
 };
 
 function onmessage(evt) {
-	var message = JSON.parse(evt.data);
+  var message = JSON.parse(evt.data);
   console.log(message)
   if (message.current != undefined) {
     currentTitle.innerHTML = message.current;
@@ -76,28 +76,23 @@ function onmessage(evt) {
 };
 
 function onclose() {
-	if (ws != undefined && ws.readyState == ws.CLOSED) {
+  if (ws != undefined && ws.readyState == ws.CLOSED) {
     console.log("Disconnected");
     update_status();
     setTimeout(connect(wsurl), 1000);
-	}
+  }
 }
 
 function send(action) {
-	var message = {
-		"action": action,
-	}
-	ws.send(JSON.stringify(message));
+  var message = {
+    "action": action,
+  }
+  ws.send(JSON.stringify(message));
   console.log(action)
 }
 
 function backward() {
   send("backward");
-  // DEBUG:
-  // var titles = document.getElementsByClassName('titles');
-  // for (var i = 0, l = titles.length; i < l; i++) {
-  //   titles[i].classList.add('fadeout');
-  // }
 }
 
 function play() {
@@ -110,21 +105,10 @@ function pause() {
 
 function forward() {
   send("forward");
-  // DEBUG:
-  // var titles = document.getElementsByClassName('titles');
-  // for (var i = 0, l = titles.length; i < l; i++) {
-  //   titles[i].classList.add('fadein');
-  // }
 }
 
 function stop() {
   send("stop");
-  // DEBUG:
-  // var titles = document.getElementsByClassName('titles');
-  // for (var i = 0, l = titles.length; i < l; i++) {
-  //   titles[i].classList.remove('fadein');
-  //   titles[i].classList.remove('fadeout');
-  // }
 }
 
 function update_status() {
