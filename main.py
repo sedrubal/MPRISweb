@@ -26,13 +26,15 @@ class StartPage(tornado.web.RequestHandler):
     """
     def get(self):
         """the handler for get requests"""
-        self.render("index.html",
-                    title=__project__,
-                    description=__doc__,
-                    author=__authors__,
-                    license=__license__,
-                    url=__url__,
-                    authors_url='/'.join(__url__.split('/')[:-1]))
+        self.render(
+            "index.html",
+            title=__project__,
+            description=__doc__,
+            author=__authors__,
+            license=__license__,
+            url=__url__,
+            authors_url='/'.join(__url__.split('/')[:-1]),
+        )
 
     def data_received(self, chunk):
         """override abstract method"""
@@ -111,7 +113,7 @@ SETTINGS = {
 def make_app():
     """create a new application and specify the url patterns"""
     return tornado.web.Application([
-        (r"/websocket", WebSocket),
+        tornado.web.URLSpec(r"/websocket", WebSocket, name="websocket"),
         (r"/", StartPage),
         (r"/static/", tornado.web.StaticFileHandler,
          dict(path=SETTINGS['static_path'])),

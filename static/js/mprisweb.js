@@ -9,18 +9,19 @@ var pausebtn = document.getElementById("pause-btn")
 var stopbtn = document.getElementById("stop-btn")
 var forwardbtn = document.getElementById("forward-btn")
 
-var url = "ws://localhost:8888/websocket";
+var wsurl = document.URL.replace(/^http/g, 'ws').replace(/\/$/g, '') + wsurl;
+console.log ("Websocket URL is " + wsurl);
 
-document.onload = connect(url);
+document.onload = connect(wsurl);
 window.onload = preloadImages();
 window.onbeforeunload = function() {
 	ws = undefined; // don't reconnect while reloading page
 };
 
 
-function connect(url) {
+function connect(wsurl) {
 	if (ws == undefined || ws.readyState == ws.CLOSED)	 {
-		ws = new WebSocket(url);
+		ws = new WebSocket(wsurl);
 		ws.onopen = onopen;
 		ws.onmessage = onmessage;
 		ws.onclose = onclose;
