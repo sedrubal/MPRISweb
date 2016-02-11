@@ -39,12 +39,15 @@ footer a:hover {
 
 .jumbotron#titlesjumbo {
   background-repeat: no-repeat;
-  background-position: 0px center;
+  background-position: 105% center;
   background-blend-mode: overlay;
-  background-size: 40% auto;
+  background-size: auto 140%;
   transition: background 1s ease-in-out;
 }
 
+.statusbadge {
+  transition: fill .5s;
+}
 .statusbadge.statusbadge-problem {
   fill: #B02727;
 }
@@ -54,3 +57,7 @@ footer a:hover {
 .statusbadge.statusbadge-ok {
   fill: #279127;
 }
+
+//.banner-scroll {
+//  overflow-x: scroll;
+//}

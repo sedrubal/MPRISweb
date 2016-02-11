@@ -10,6 +10,8 @@ var stopbtn = document.getElementById("stop-btn");
 var forwardbtn = document.getElementById("forward-btn");
 // status
 var statusbadges = document.getElementsByClassName("statusbadge");
+// scroll animation
+var banners = document.getElementsByClassName("banner-scroll");
 
 var wsurl = document.URL.replace(/^http/g, 'ws').replace(/\/$/g, '') + wsurl;
 console.log("Websocket URL is " + wsurl);
@@ -130,3 +132,6 @@ function preloadImages() {
   img.src = titlesjumbo.dataset.bckgrndPause;
   img.src = titlesjumbo.dataset.bckgrndStop;
 }
+
+// scroll animations
+// TODO
