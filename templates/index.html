@@ -48,7 +48,19 @@
 
     <footer>
       <div class="container">
-        <h1>{{ title }}</h1>
+        <h1>{{ title }}
+          <span class="statusbadge statusbadge-progress">
+            <svg height="32" width="32">
+              <defs>
+                <filter id="status-filter-gauss" height="2.2" width="2.2" y="-0.6" x="-0.6">
+                  <feGaussianBlur stdDeviation="5" />
+                </filter>
+              </defs>
+              <circle r="8" cy="16" cx="16"/>
+              <circle r="8" cx="16" cy="16" style="filter:url(#status-filter-gauss)"/>
+            </svg>
+          </span>
+        </h1>
         <p>{{ description }}</p>
       </div>
       <p><span class="glyphicon glyphicon-copyright-mark"></span>&nbsp;<a href="{{ authors_url }}">{{ author }}</a>&nbsp;·&nbsp;{{ license }}

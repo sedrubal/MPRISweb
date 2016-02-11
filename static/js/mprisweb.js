@@ -8,6 +8,8 @@ var playbtn = document.getElementById("play-btn")
 var pausebtn = document.getElementById("pause-btn")
 var stopbtn = document.getElementById("stop-btn")
 var forwardbtn = document.getElementById("forward-btn")
+// status
+var statusbadges = document.getElementsByClassName("statusbadge");
 
 var wsurl = document.URL.replace(/^http/g, 'ws').replace(/\/$/g, '') + wsurl;
 console.log ("Websocket URL is " + wsurl);
@@ -25,13 +27,17 @@ function connect(wsurl) {
 		ws.onopen = onopen;
 		ws.onmessage = onmessage;
 		ws.onclose = onclose;
-		ws.onerror = function (error) { // TODO reconnect
+		ws.onerror = function (error) {
 			console.log('WebSocket Error ' + error);
+      update_status();
 		};
+    console.log("Connected");
+    update_status();
 	}
 }
 
 function onopen() {
+  update_status();
 };
 
 function onmessage(evt) {
@@ -71,6 +77,9 @@ function onmessage(evt) {
 
 function onclose() {
 	if (ws != undefined && ws.readyState == ws.CLOSED) {
+    console.log("Disconnected");
+    update_status();
+    setTimeout(connect(wsurl), 1000);
 	}
 }
 
@@ -116,6 +125,18 @@ function stop() {
   //   titles[i].classList.remove('fadein');
   //   titles[i].classList.remove('fadeout');
   // }
+}
+
+function update_status() {
+  for (var i = 0, l = statusbadges.length; i < l; i++) {
+    if (ws.readyState == ws.OPEN) {
+      statusbadges[i].className = "statusbadge statusbadge-ok";
+    } else if (ws.readyState == ws.CONNECTING || ws.readyState == ws.CLOSING) {
+      statusbadges[i].className = "statusbadge statusbadge-progress";
+    } else {
+      statusbadges[i].className = "statusbadge statusbadge-problem";
+    }
+  }
 }
 
 // preload titlesjumbo background images:
