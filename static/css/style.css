@@ -36,3 +36,11 @@ footer a:hover {
   margin-left: 100px;
   opacity: 0;
 }
+
+.jumbotron#titlesjumbo {
+  background-repeat: no-repeat;
+  background-position: 0px center;
+  background-blend-mode: overlay;
+  background-size: 40% auto;
+  transition: background 1s ease-in-out;
+}

@@ -51,6 +51,13 @@ class MPRISWrapper(object):
         """returns the title of the next track"""
         return self.next_title
 
+    def get_playback_status(self):
+        """
+        :return a string representing the current player status:
+            (playing|pause|stopped)
+        """
+        return str(self.player.PlaybackStatus).lower()
+
     def previous(self):
         """jump to previous track"""
         self.player.Previous()

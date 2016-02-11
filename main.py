@@ -80,6 +80,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         msg = {
             "current": APP.mpris_wrapper.get_current_title(),
             "next": APP.mpris_wrapper.get_next_title(),
+            "status": APP.mpris_wrapper.get_playback_status(),
         }
         self.write_message(json.dumps(msg), binary=False)
         log("send: {0}".format(msg), min_verbosity=1)

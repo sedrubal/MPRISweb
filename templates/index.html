@@ -18,7 +18,10 @@
   </head>
   <body>
 
-    <div class="jumbotron">
+    <div id="titlesjumbo" class="jumbotron"
+      data-bckgrnd-play="{{ static_url("img/play.svg") }}"
+      data-bckgrnd-pause="{{ static_url("img/pause.svg") }}"
+      data-bckgrnd-stop="{{ static_url("img/stop.svg") }}">
       <div class="container">
         <div class="titles">
           <h1><small>current:</small> <span id="current">My wonderful track</span></h1>
