@@ -16,8 +16,6 @@ class MPRISWrapper(object):
         :param properties_changed_handler: a function that will be executed on
         status changes like `def handler(self, *args, **kw)`
         """
-        # DEBUG:
-        self.next_title = "Next wonderful track"
         # initialize DBus:
         DBusGMainLoop(set_as_default=True)
         self.uri = next(mpris2.get_players_uri())
@@ -49,7 +47,7 @@ class MPRISWrapper(object):
 
     def get_next_title(self):
         """returns the title of the next track"""
-        return self.next_title
+        return None
 
     def get_playback_status(self):
         """

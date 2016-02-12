@@ -2,6 +2,7 @@ var ws;
 var titlesjumbo = document.getElementById("titlesjumbo");
 var currentTitle = document.getElementById("current");
 var nextTitle = document.getElementById("next");
+var nextTitleHeading = document.getElementById("next-heading");
 // media buttons
 var mediabtndiv = document.getElementById("mediabtns");
 var backwardbtn = document.getElementById("backward-btn");
@@ -51,6 +52,9 @@ function onmessage(evt) {
   }
   if (message.titles.next != undefined) {
     nextTitle.innerHTML = message.titles.next;
+    nextTitleHeading.classList.remove("hide");
+  } else {
+    nextTitleHeading.classList.add("hide");
   }
   if (message.player.canControl != undefined && !message.player.canControl) {
     mediabtndiv.classList.add("hide");
@@ -82,11 +86,6 @@ function onmessage(evt) {
         console.log("Invalid playback status " + message.status)
     }
   }
-  console.log(showBack);
-  console.log(message.player != undefined);
-  console.log(message.player.canGoPrevious == undefined);
-  console.log(!message.player.canGoPrevious);
-  console.log(message.player.canGoPrevious == undefined || message.player.canGoPrevious);
   if (message.player != undefined) {
     showBack &= (message.player.canGoPrevious == undefined || message.player.canGoPrevious);
     showFor &= (message.player.canGoNext == undefined || message.player.canGoNext);
