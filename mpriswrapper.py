@@ -45,7 +45,7 @@ class MPRISWrapper(object):
     def _convert(value):
         """convert MPRIS datatypes to python types"""
         if isinstance(value, dbus.String):
-            return str(value)
+            return unicode(value)
         elif isinstance(value, dbus.ObjectPath):
             return str(value)
         elif isinstance(value, dbus.Int32):
