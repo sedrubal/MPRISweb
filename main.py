@@ -16,6 +16,9 @@ import tornado.web
 import tornado.websocket
 import os
 import json
+import magic
+import base64
+import re
 from mpriswrapper import MPRISWrapper
 from helpers import log, set_verbosity
 
@@ -94,6 +97,30 @@ class WebSocket(tornado.websocket.WebSocketHandler):
                 "canPause": APP.mpris_wrapper.get_can_pause(),
             },
         }
+        if 'trackMetadata' in msg.keys() and \
+                'artUri' in msg['trackMetadata'].keys() and \
+                msg['trackMetadata']['artUri']:
+            arturi = msg['trackMetadata']['artUri'].strip().replace("file://",
+                                                                    '')
+            if arturi and os.path.isfile(arturi):
+                mime = magic.open(magic.MAGIC_MIME)
+                mime.load()
+                mimetype = mime.file(arturi)
+                mimere = re.compile(r'(?P<mimetype>image/(png|jpeg|jpg|bmp|gif));.*')
+                mimes = mimere.findall(mimetype)
+                if len(mimes) == 1:
+                    mimetype = mimes[0][0]
+                    img = base64.encodestring(open(arturi, "rb").read())
+                    img = img.replace('\n', '')
+                    img = "data:{mime};base64,{base64}".format(
+                        mime=mimetype, base64=img)
+                    msg['trackMetadata']['art'] = img
+                else:
+                    log("Artwork '{0}' rejected: invalid mimetype {1}".
+                        format(arturi, mimetype), min_verbosity=1, error=True)
+            else:
+                log("Artwork '{0}' won't be displayed: file not found".
+                    format(arturi), min_verbosity=1, error=True)
         self.write_message(json.dumps(msg), binary=False)
         log("send: {0}".format(msg), min_verbosity=1)
 

@@ -1,9 +1,11 @@
 var ws;
-var titlesjumbo = document.getElementById("titlesjumbo");
+var playstatuslayer = document.getElementById("playstatuslayer");
+var artimagelayers = document.getElementsByClassName("artimagelayer")
 var currentTitle = document.getElementById("current");
 var nextTitle = document.getElementById("next");
 var nextTitleHeading = document.getElementById("next-heading");
 var trackDetails = document.getElementById("track-details");
+var artimages = document.getElementsByClassName("artimage");
 // media buttons
 var mediabtndiv = document.getElementById("mediabtns");
 var backwardbtn = document.getElementById("backward-btn");
@@ -69,19 +71,19 @@ function onmessage(evt) {
         showPlay &= false;
         showPause &= true;
         enableStop &= true;
-        titlesjumbo.style.backgroundImage = "url(" + titlesjumbo.dataset.bckgrndPlay + ")";
+        playstatuslayer.style.backgroundImage = "url(" + playstatuslayer.dataset.bckgrndPlay + ")";
         break;
       case 'paused':
         showPlay &= true;
         showPause &= false;
         enableStop &= true;
-        titlesjumbo.style.backgroundImage = "url(" + titlesjumbo.dataset.bckgrndPause + ")";
+        playstatuslayer.style.backgroundImage = "url(" + playstatuslayer.dataset.bckgrndPause + ")";
         break;
       case 'stopped':
         showPlay &= true;
         showPause &= false;
         enableStop &= false;
-        titlesjumbo.style.backgroundImage = "url(" + titlesjumbo.dataset.bckgrndStop + ")";
+        playstatuslayer.style.backgroundImage = "url(" + playstatuslayer.dataset.bckgrndStop + ")";
         break;
       default:
         console.log("Invalid playback status " + message.status)
@@ -165,6 +167,19 @@ function update_track_metadata(meta) {
       text += "<p><b>URL:</b> " + meta.url + "</p>";
   }
   trackDetails.getElementsByClassName("well")[0].innerHTML = text;
+
+  for (var i = 0, l = artimagelayers.length; i < l; i++) {
+    if (meta.art != undefined && meta.art != "") {
+      artimagelayers[i].style.backgroundImage = "url(" + meta.art + ")";
+      playstatuslayer.style.backgroundColor = "transparent";
+    } else {
+      playstatuslayer.style.backgroundColor = "#eee";
+      artimagelayers[i].style.backgroundImage = "";
+    }
+  }
+  for (var i = 0, l = artimages.length; i < l; i++) {
+    artimages[i].src = meta.art;
+  }
 }
 
 function onclose() {
@@ -215,12 +230,12 @@ function update_status() {
   }
 }
 
-// preload titlesjumbo background images:
+// preload playstatuslayer background images:
 function preloadImages() {
   img = new Image();
-  img.src = titlesjumbo.dataset.bckgrndPlay;
-  img.src = titlesjumbo.dataset.bckgrndPause;
-  img.src = titlesjumbo.dataset.bckgrndStop;
+  img.src = playstatuslayer.dataset.bckgrndPlay;
+  img.src = playstatuslayer.dataset.bckgrndPause;
+  img.src = playstatuslayer.dataset.bckgrndStop;
 }
 
 // scroll animations
