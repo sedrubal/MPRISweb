@@ -41,7 +41,7 @@
       <div class="row text-center">
 
         <div class="collapse" id="track-details">
-          <h3>Track Details:</h3>
+          <h3 data-toggle="collapse" href="#track-details">Track Details:</h3>
           <div class="well">
             <p><b>Artist:</b> A awesome artist</p>
           </div>
@@ -103,6 +103,16 @@ $(document).ready( function() {
     placement : 'bottom',
     title: ' <span class="glyphicon glyphicon-info-sign"></span> Display track info',
     html: true,
+  });
+  $('#track-details').on('show.bs.collapse', function () {
+    $('html, body').animate({
+      scrollTop: $('#track-details').offsetParent().height()
+    }, 300, function(){ window.location.hash = "#track-details"; });
+  });
+  $('#track-details').on('hide.bs.collapse', function () {
+    $('html, body').animate({scrollTop: 0}, 300, function(){
+      window.location.hash = "#";
+    });
   });
 });
     </script>
