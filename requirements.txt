@@ -1,2 +1,5 @@
 tornado
 mpris2
+# dbus?
+argparse
+argcomplete

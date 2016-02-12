@@ -20,7 +20,7 @@ import magic
 import base64
 import re
 from mpriswrapper import MPRISWrapper
-from helpers import log, set_verbosity
+from helpers import log, parse_args
 
 
 class StartPage(tornado.web.RequestHandler):
@@ -52,7 +52,8 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         """when a client connects, add this socket to list"""
         APP.clients.append(self)
         self.send_status()
-        log("WebSocket opened", min_verbosity=1)
+        log("WebSocket opened. {0} child(s) connected".
+            format(len(APP.clients)), min_verbosity=1)
 
     def on_message(self, message):
         """new message received"""
@@ -127,7 +128,8 @@ class WebSocket(tornado.websocket.WebSocketHandler):
     def on_close(self):
         """the client of this socket leaved, remove this socket from list"""
         APP.clients.remove(self)
-        log("WebSocket closed", min_verbosity=1)
+        log("WebSocket closed. {0} child(s) connected".
+            format(len(APP.clients)), min_verbosity=1)
 
     def data_received(self, chunk):
         """override abstract method"""
@@ -156,10 +158,18 @@ def make_app():
          dict(path=SETTINGS['static_path'])),
     ], **SETTINGS)
 
-if __name__ == "__main__":
-    APP = make_app()
-    set_verbosity(5)  # TODO argparse
+
+def main():
+    """the main function starts the server"""
+    APP.args = parse_args()
     APP.clients = []  # global list of all connected websocket clients
     APP.mpris_wrapper = MPRISWrapper(mpris_prop_change_handler)
-    APP.listen(8888)
+    APP.listen(APP.args.port, address=APP.args.ip)
+    log("App will listen on http://{ip}:{port}".format(
+        ip=APP.args.ip, port=APP.args.port))
     tornado.ioloop.IOLoop.current().start()
+
+
+if __name__ == "__main__":
+    APP = make_app()
+    main()

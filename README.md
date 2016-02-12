@@ -10,7 +10,7 @@ Usage
 -----
 
  - Install: `./setup.py install`
- - Run the app: `./main.py`
+ - Run the app: `./mprisweb/mprisweb.py`
  - Go to: [http://localhost:8888/](http://localhost:8888/)
 
 Features
