@@ -1,6 +1,6 @@
 var ws;
 var playstatuslayer = document.getElementById("playstatuslayer");
-var artimagelayers = document.getElementsByClassName("artimagelayer")
+var artimagelayer = document.getElementById("artimagelayer")
 var currentTitle = document.getElementById("current");
 var nextTitle = document.getElementById("next");
 var nextTitleHeading = document.getElementById("next-heading");
@@ -26,7 +26,14 @@ window.onload = preloadImages();
 window.onbeforeunload = function() {
   ws = undefined; // don't reconnect while reloading page
 };
+window.onresize = onWindowResize;
 
+
+Array.prototype.min = function() {
+  var min = this[0];
+  for (var i = 1; i < this.length; i++) if (this[i] < min) min = this[i];
+  return min;
+}
 
 function connect(wsurl) {
   if (ws == undefined || ws.readyState == ws.CLOSED) {
@@ -168,17 +175,26 @@ function update_track_metadata(meta) {
   }
   trackDetails.getElementsByClassName("well")[0].innerHTML = text;
 
-  for (var i = 0, l = artimagelayers.length; i < l; i++) {
-    if (meta.art != undefined && meta.art != "") {
-      artimagelayers[i].style.backgroundImage = "url(" + meta.art + ")";
-      playstatuslayer.style.backgroundColor = "transparent";
-    } else {
-      playstatuslayer.style.backgroundColor = "#eee";
-      artimagelayers[i].style.backgroundImage = "";
-    }
+  if (meta.art == undefined) {
+   meta.art = "";
   }
-  for (var i = 0, l = artimages.length; i < l; i++) {
+  if (meta.art != "") {
+    artimagelayer.style.backgroundImage = "url(" + meta.art + ")";
+    artimagelayer.classList.add("contains-image");
+  } else {
+    setTimeout(lazy_remove_artimage(), 1000);
+    artimagelayer.classList.remove("contains-image");
+  }
+  for (var i = 0; i < artimages.length; i++) {
     artimages[i].src = meta.art;
+  }
+}
+
+function lazy_remove_artimage() {
+  // for nicer animations: keep image until layer above is completely faded in
+  if (artimages[0].src == "") {
+    // indicator, if there is an artimage
+    artimagelayer.style.backgroundImage = "";
   }
 }
 
@@ -219,7 +235,7 @@ function stop() {
 }
 
 function update_status() {
-  for (var i = 0, l = statusbadges.length; i < l; i++) {
+  for (var i = 0; i < statusbadges.length; i++) {
     if (ws.readyState == ws.OPEN) {
       statusbadges[i].className = "statusbadge statusbadge-ok";
     } else if (ws.readyState == ws.CONNECTING || ws.readyState == ws.CLOSING) {
@@ -238,5 +254,12 @@ function preloadImages() {
   img.src = playstatuslayer.dataset.bckgrndStop;
 }
 
-// scroll animations
+// scroll banner animations
 // TODO
+
+function onWindowResize() {
+  var arr = [artimagelayer.offsetWidth, playstatuslayer.offsetWidth, window.innerHeight];
+  h = arr.min() + "px";
+  artimagelayer.style.maxHeight = h;
+  playstatuslayer.style.maxHeight = h;
+}

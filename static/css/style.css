@@ -28,6 +28,7 @@ footer a:hover {
   margin-left: 0px;
   opacity: 1;
   overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 .titles.fadeout {
@@ -39,27 +40,47 @@ footer a:hover {
   opacity: 0;
 }
 
-#titlesjumbo,
-div.artimagelayer {
-  color: #333;
-  background-color: #eee;
-  background-repeat: no-repeat;
-  background-size: 100% auto;
-  background-position: center 30%;
-  transition: background 1s ease-in-out;
-}
-.jumbotron#playstatuslayer {
-  background-color: transparent;
-  background-repeat: no-repeat;
-  background-size: auto 140%;
-  background-position: 105% center;
-  background-blend-mode: overlay;
-  transition: background 1s ease-in-out;
-}
+
 .jumbotron a,
 .jumbotron a:hover {
   color: #333;
   text-decoration: none;
+}
+#titles,
+div#artimagelayer,
+div#playstatuslayer {
+  transition: height 1s ease-in-out, background 1s ease-in-out;
+  background-repeat: no-repeat;
+}
+div#artimagelayer {
+  color: #333;
+  background-size: cover;
+  background-position: center 30%;
+}
+div#playstatuslayer {
+  background-size: auto 140%;
+  background-position: 105% center;
+  background-blend-mode: overlay;
+}
+div#artimagelayer.contains-image > #playstatuslayer {
+  background-color: transparent;
+  height: 30em;
+  background-size: auto 15%;
+  background-position: bottom 5px right 5px;
+}
+div#artimagelayer.contains-image #playstatuslayer * {
+  transition: opacity 2s ease-in-out 1s;
+  opacity: 0;
+}
+div#artimagelayer.contains-image #playstatuslayer .titles > * {
+  background-color: rgba(238, 238, 238, .25);
+}
+div#artimagelayer.contains-image:hover #playstatuslayer {
+  height: 100em;
+}
+div#artimagelayer.contains-image:hover #playstatuslayer * {
+  transition: opacity .5s ease-in-out;
+  opacity: 1;
 }
 
 .statusbadge {
@@ -75,6 +96,7 @@ div.artimagelayer {
   fill: #279127;
 }
 
-//.banner-scroll {
-//  overflow-x: scroll;
-//}
+/*.banner-scroll {
+ * overflow-x: scroll;
+ *}
+ */
