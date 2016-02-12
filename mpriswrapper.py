@@ -7,6 +7,7 @@ import mpris2
 import signal
 import thread
 from helpers import log
+import dbus
 
 
 class MPRISWrapper(object):
@@ -40,14 +41,59 @@ class MPRISWrapper(object):
         log("GLib loop exited", min_verbosity=2)
         thread.exit_thread()
 
+    @staticmethod
+    def _convert(value):
+        """convert MPRIS datatypes to python types"""
+        if isinstance(value, dbus.String):
+            return str(value)
+        elif isinstance(value, dbus.ObjectPath):
+            return str(value)
+        elif isinstance(value, dbus.Int32):
+            return int(value)
+        elif isinstance(value, dbus.Int64):
+            return int(value)  # int is great enough I think
+        elif isinstance(value, dbus.Double):
+            return float(value)
+        elif isinstance(value, dbus.Array):
+            return [MPRISWrapper._convert(v) for v in value]
+
+    def get_current_metadata(self):
+        """returns the metadata of the current track"""
+        mprismeta = self.player.Metadata
+        get = lambda x: MPRISWrapper._convert(mprismeta.get(x))
+        meta = {
+            'album': get(mprismeta.ALBUM),
+            'albumArtist': get(mprismeta.ALBUM_ARTIST),
+            'artist': get(mprismeta.ARTIST),
+            'artUri': get(mprismeta.ART_URI),
+            'asText': get(mprismeta.AS_TEXT),
+            'audioBpm': get(mprismeta.AUDIO_BPM),
+            'autoRating': get(mprismeta.AUTO_RATING),
+            'comment': get(mprismeta.COMMENT),
+            'composer': get(mprismeta.COMPOSER),
+            'contentCreated ': get(mprismeta.CONTENT_CREATED),
+            'discNumber': get(mprismeta.DISC_NUMBER),
+            'firstUsed': get(mprismeta.FIRST_USED),
+            'genre': get(mprismeta.GENRE),
+            'lastUsed': get(mprismeta.LAST_USED),
+            'length': get(mprismeta.LENGTH),
+            'lyricist': get(mprismeta.LYRICIST),
+            'title': get(mprismeta.TITLE),
+            'trackid': get(mprismeta.TRACKID),
+            'trackNumber': get(mprismeta.TRACK_NUMBER),
+            'url': get(mprismeta.URL),
+            'userRating': get(mprismeta.USER_RATING),
+            'useCount': get(mprismeta.USE_COUNT),
+        }
+        return meta
+
     def get_current_title(self):
         """returns the title of the current track"""
-        meta = self.player.Metadata
-        return str(meta.get(meta.TITLE))
+        return self.get_current_metadata()['title']
 
     def get_next_title(self):
         """returns the title of the next track"""
-        return None
+        return None  # TODO
 
     def get_playback_status(self):
         """

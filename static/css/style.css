@@ -1,8 +1,10 @@
 html {
   background-color: #2A2730;
+  color: #99979C;
 }
 body {
   background-color: #2A2730;
+  color: #99979C;
 }
 footer {
   text-align:center;
@@ -38,11 +40,17 @@ footer a:hover {
 }
 
 .jumbotron#titlesjumbo {
+  color: #333;
   background-repeat: no-repeat;
   background-position: 105% center;
   background-blend-mode: overlay;
   background-size: auto 140%;
   transition: background 1s ease-in-out;
+}
+.jumbotron a,
+.jumbotron a:hover {
+  color: #333;
+  text-decoration: none;
 }
 
 .statusbadge {

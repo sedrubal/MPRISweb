@@ -3,6 +3,7 @@ var titlesjumbo = document.getElementById("titlesjumbo");
 var currentTitle = document.getElementById("current");
 var nextTitle = document.getElementById("next");
 var nextTitleHeading = document.getElementById("next-heading");
+var trackDetails = document.getElementById("track-details");
 // media buttons
 var mediabtndiv = document.getElementById("mediabtns");
 var backwardbtn = document.getElementById("backward-btn");
@@ -92,6 +93,10 @@ function onmessage(evt) {
     showPlay &= (message.player.canPlay == undefined || message.player.canPlay);
     showPause &= (message.player.canPause == undefined || message.player.canPause);
   }
+  if (message.trackMetadata != undefined) {
+    update_track_metadata(message.trackMetadata);
+  }
+  // decide which buttons will be used
   if (showBack) {
     backwardbtn.classList.remove("hide");
   } else {
@@ -114,6 +119,53 @@ function onmessage(evt) {
   }
   stopbtn.disabled = !enableStop;
 };
+
+function update_track_metadata(meta) {
+  text = "";
+  if (meta.trackNumber != undefined && meta.trackNumber != "") {
+      text += "<p><b>Track Nr.:</b> " + meta.trackNumber + "</p>";
+  }
+  if (meta.title != undefined && meta.title != "") {
+      text += "<p><b>Title:</b> " + meta.title + "</p>";
+  }
+  if (meta.album != undefined && meta.album != "") {
+      text += "<p><b>Album:</b> " + meta.album + "</p>";
+  }
+  if (meta.albumArtist != undefined && meta.albumArtist != "") {
+      text += "<p><b>Album Artist:</b> " + meta.albumArtist + "</p>";
+  }
+  if (meta.artist != undefined && meta.artist != "") {
+      text += "<p><b>Artist:</b> " + meta.artist + "</p>";
+  }
+  if (meta.audioBpm != undefined && meta.audioBpm != "") {
+      text += "<p><b>Audio BPM:</b> " + meta.audioBpm + "</p>";
+  }
+  if (meta.userRating != undefined && meta.userRating != "") {
+      text += "<p><b>User Rating:</b> " + meta.userRating + "</p>";
+  }
+  if (meta.autoRating != undefined && meta.autoRating != "") {
+      text += "<p><b>Auto Rating:</b> " + meta.autoRating + "</p>";
+  }
+  if (meta.comment != undefined && meta.comment != "") {
+      text += "<p><b>Comment:</b> " + meta.comment + "</p>";
+  }
+  if (meta.composer != undefined && meta.composer != "") {
+      text += "<p><b>Composer:</b> " + meta.composer + "</p>";
+  }
+  if (meta.discNumber != undefined && meta.discNumber != "") {
+      text += "<p><b>Disc Nr.:</b> " + meta.discNumber + "</p>";
+  }
+  if (meta.genre != undefined && meta.genre != "") {
+      text += "<p><b>Genre:</b> " + meta.genre + "</p>";
+  }
+  if (meta.lyricist != undefined && meta.lyricist != "") {
+      text += "<p><b>Lyricist:</b> " + meta.lyricist + "</p>";
+  }
+  if (meta.url != undefined && meta.url != "") {
+      text += "<p><b>URL:</b> " + meta.url + "</p>";
+  }
+  trackDetails.getElementsByClassName("well")[0].innerHTML = text;
+}
 
 function onclose() {
   if (ws != undefined && ws.readyState == ws.CLOSED) {

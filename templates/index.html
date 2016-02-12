@@ -24,9 +24,27 @@
       data-bckgrnd-stop="{{ static_url("img/stop.svg") }}">
       <div class="container">
         <div class="titles">
-          <h1 class="banner-scroll"><small class="hidden-xs">current:</small> <span id="current">My wonderful track</span></h1>
+          <h1 class="banner-scroll">
+            <small class="hidden-xs">current:</small>
+            <a data-toggle="collapse" href="#track-details" aria-expanded="false">
+              <span id="current" data-toggle="tooltip">My wonderful track</span>
+            </a>
+          </h1>
           <h2 id="next-heading" class="banner-scroll"><small>next:</small> <span id="next">Next wonderful track</span></h2>
         </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row text-center">
+
+        <div class="collapse" id="track-details">
+          <h3>Track Details:</h3>
+          <div class="well">
+            <p><b>Artist:</b> A awesome artist</p>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -74,8 +92,16 @@
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <!-- The main javascript -->
-    <script>
+    <script type="text/javascript">
 wsurl = "{{ reverse_url("websocket") }}";
+// tooltips
+$(document).ready( function() {
+  $('[data-toggle="tooltip"]').tooltip({
+    placement : 'bottom',
+    title: ' <span class="glyphicon glyphicon-info-sign"></span> Display track info',
+    html: true,
+  });
+});
     </script>
     <script src="{{ static_url("js/mprisweb.js") }}"></script>
   </body>

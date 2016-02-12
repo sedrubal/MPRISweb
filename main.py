@@ -84,6 +84,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
                 "current": APP.mpris_wrapper.get_current_title(),
                 "next": APP.mpris_wrapper.get_next_title(),
             },
+            "trackMetadata": APP.mpris_wrapper.get_current_metadata(),
             "status": APP.mpris_wrapper.get_playback_status(),
             "player": {
                 "canControl": APP.mpris_wrapper.get_can_control(),
