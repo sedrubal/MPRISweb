@@ -21,8 +21,11 @@ var banners = document.getElementsByClassName("banner-scroll");
 var wsurl = document.URL.replace(/^http/g, 'ws').split('#')[0].split('?')[0].replace(/\/$/g, '') + wsurl;
 console.log("Websocket URL is " + wsurl);
 
-document.onload = connect(wsurl);
-window.onload = preloadImages();
+window.onload = function onLoad() {
+  connect(wsurl);
+  onWindowResize();
+  preloadImages();
+};
 window.onbeforeunload = function() {
   ws = undefined; // don't reconnect while reloading page
 };
