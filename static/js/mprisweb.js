@@ -16,7 +16,7 @@ var statusbadges = document.getElementsByClassName("statusbadge");
 // scroll animation
 var banners = document.getElementsByClassName("banner-scroll");
 
-var wsurl = document.URL.replace(/^http/g, 'ws').replace(/\/$/g, '') + wsurl;
+var wsurl = document.URL.replace(/^http/g, 'ws').split('#')[0].split('?')[0].replace(/\/$/g, '') + wsurl;
 console.log("Websocket URL is " + wsurl);
 
 document.onload = connect(wsurl);
