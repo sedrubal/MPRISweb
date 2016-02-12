@@ -3,6 +3,7 @@ var titlesjumbo = document.getElementById("titlesjumbo");
 var currentTitle = document.getElementById("current");
 var nextTitle = document.getElementById("next");
 // media buttons
+var mediabtndiv = document.getElementById("mediabtns");
 var backwardbtn = document.getElementById("backward-btn");
 var playbtn = document.getElementById("play-btn");
 var pausebtn = document.getElementById("pause-btn");
@@ -45,36 +46,74 @@ function onopen() {
 function onmessage(evt) {
   var message = JSON.parse(evt.data);
   console.log(message)
-  if (message.current != undefined) {
-    currentTitle.innerHTML = message.current;
+  if (message.titles.current != undefined) {
+    currentTitle.innerHTML = message.titles.current;
   }
-  if (message.next != undefined) {
-    nextTitle.innerHTML = message.next;
+  if (message.titles.next != undefined) {
+    nextTitle.innerHTML = message.titles.next;
   }
+  if (message.player.canControl != undefined && !message.player.canControl) {
+    mediabtndiv.classList.add("hide");
+  } else {
+    mediabtndiv.classList.remove("hide");
+  }
+  var showBack = true, showFor = true, showPlay = true, showPause = true, enableStop = true;
   if (message.status != undefined) {
     switch (message.status) {
       case 'playing':
-        playbtn.style.display = "none";
-        pausebtn.style.display = "inline-block";
-        stopbtn.disabled = false;
+        showPlay &= false;
+        showPause &= true;
+        enableStop &= true;
         titlesjumbo.style.backgroundImage = "url(" + titlesjumbo.dataset.bckgrndPlay + ")";
         break;
       case 'paused':
-        playbtn.style.display = "inline-block";
-        pausebtn.style.display = "none";
-        stopbtn.disabled = false;
+        showPlay &= true;
+        showPause &= false;
+        enableStop &= true;
         titlesjumbo.style.backgroundImage = "url(" + titlesjumbo.dataset.bckgrndPause + ")";
         break;
       case 'stopped':
-        playbtn.style.display = "inline-block";
-        pausebtn.style.display = "none";
-        stopbtn.disabled = true;
+        showPlay &= true;
+        showPause &= false;
+        enableStop &= false;
         titlesjumbo.style.backgroundImage = "url(" + titlesjumbo.dataset.bckgrndStop + ")";
         break;
       default:
         console.log("Invalid playback status " + message.status)
     }
   }
+  console.log(showBack);
+  console.log(message.player != undefined);
+  console.log(message.player.canGoPrevious == undefined);
+  console.log(!message.player.canGoPrevious);
+  console.log(message.player.canGoPrevious == undefined || message.player.canGoPrevious);
+  if (message.player != undefined) {
+    showBack &= (message.player.canGoPrevious == undefined || message.player.canGoPrevious);
+    showFor &= (message.player.canGoNext == undefined || message.player.canGoNext);
+    showPlay &= (message.player.canPlay == undefined || message.player.canPlay);
+    showPause &= (message.player.canPause == undefined || message.player.canPause);
+  }
+  if (showBack) {
+    backwardbtn.classList.remove("hide");
+  } else {
+    backwardbtn.classList.add("hide")
+  }
+  if (showPlay) {
+    playbtn.classList.remove("hide");
+  } else {
+    playbtn.classList.add("hide")
+  }
+  if (showPause) {
+    pausebtn.classList.remove("hide");
+  } else {
+    pausebtn.classList.add("hide")
+  }
+  if (showFor) {
+    forwardbtn.classList.remove("hide");
+  } else {
+    forwardbtn.classList.add("hide")
+  }
+  stopbtn.disabled = !enableStop;
 };
 
 function onclose() {

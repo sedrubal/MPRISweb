@@ -58,13 +58,45 @@ class MPRISWrapper(object):
         """
         return str(self.player.PlaybackStatus).lower()
 
+    def get_can_control(self):
+        """
+        :return if there is a player that allows to be controled via MPRIS
+        """
+        return bool(self.player.CanControl)
+
+    def get_can_go_next(self):
+        """
+        :return if there is a player allows to go to next track via MPRIS
+        """
+        return bool(self.player.CanGoNext) and self.get_can_control()
+
+    def get_can_go_previous(self):
+        """
+        :return if there is a player allows to go to previous track via MPRIS
+        """
+        return bool(self.player.CanGoPrevious) and self.get_can_control()
+
+    def get_can_play(self):
+        """
+        :return if there is a player that allows to start playing via MPRIS
+        """
+        return bool(self.player.CanPlay) and self.get_can_control()
+
+    def get_can_pause(self):
+        """
+        :return if there is a player that allows to pausing via MPRIS
+        """
+        return bool(self.player.CanPause) and self.get_can_control()
+
     def previous(self):
         """jump to previous track"""
-        self.player.Previous()
+        if self.get_can_go_previous():
+            self.player.Previous()
 
     def play(self):
         """start playing"""
-        self.player.Play()
+        if self.get_can_play():
+            self.player.Play()
 
     def stop(self):
         """stop playing"""
@@ -72,8 +104,10 @@ class MPRISWrapper(object):
 
     def pause(self):
         """pause playing"""
-        self.player.Pause()
+        if self.get_can_pause():
+            self.player.Pause()
 
     def next(self):
         """jump to the next track"""
-        self.player.Next()
+        if self.get_can_go_next():
+            self.player.Next()
