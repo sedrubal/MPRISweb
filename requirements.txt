@@ -3,4 +3,4 @@ mpris2
 # dbus?
 argparse
 argcomplete
-python-magic
+file-magic

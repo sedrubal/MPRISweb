@@ -131,7 +131,7 @@ def base64_encode_image(filename):
         log("Artwork '{0}' won't be displayed: {2}".
             format(filename, err.message), min_verbosity=1, error=True)
         return None
-    mimetype = APP.magic.from_buffer(img).split(';')[0]
+    mimetype = APP.magic.buffer(img).split(';')[0]
     mimere = re.compile(r'(?P<mimetype>image/(png|jpeg|jpg|bmp|gif)).*')
     mimes = mimere.findall(mimetype)
     if len(mimes) == 1:
@@ -179,9 +179,10 @@ def main():
     APP.args = parse_args()
     APP.clients = []  # global list of all connected websocket clients
     APP.mpris_wrapper = MPRISWrapper(mpris_prop_change_handler)
-    log("Loading magic file for mimetypes. Please wait.")
-    APP.magic = magic.Magic(mime=True, uncompress=True)
-    log("Loading finished.", min_verbosity=1)
+    log("Loading magic file for mimetypes. Please wait.", min_verbosity=1)
+    APP.magic = magic.open(magic.MAGIC_MIME)
+    APP.magic.load()
+    log("Loading finished.", min_verbosity=2)
     APP.listen(APP.args.port, address=APP.args.ip)
     log("App will listen on http://{ip}:{port}".format(
         ip=APP.args.ip, port=APP.args.port))
