@@ -44,19 +44,41 @@ class MPRISWrapper(object):
 
     @staticmethod
     def _convert(value):
-        """convert MPRIS datatypes to python types"""
-        if isinstance(value, dbus.String):
-            return unicode(value)
-        elif isinstance(value, dbus.ObjectPath):
-            return str(value)
-        elif isinstance(value, dbus.Int32):
+        """
+        convert MPRIS datatypes to python types
+        :reference https://dbus.freedesktop.org/doc/dbus-python/doc/tutorial.html#basic-types
+        """
+        if isinstance(value, dbus.Boolean):
+            return bool(value)
+        elif isinstance(value, dbus.Byte) or \
+                isinstance(value, dbus.UInt16) or \
+                isinstance(value, dbus.UInt32) or \
+                isinstance(value, dbus.Int16) or \
+                isinstance(value, dbus.Int32) or \
+                isinstance(value, dbus.Int64):
             return int(value)
-        elif isinstance(value, dbus.Int64):
-            return int(value)  # int is great enough I think
+        elif isinstance(value, dbus.UInt64):
+            return long(value)
         elif isinstance(value, dbus.Double):
             return float(value)
+        elif isinstance(value, dbus.UTF8String) or \
+                isinstance(value, dbus.ObjectPath) or \
+                isinstance(value, dbus.Signature):
+            return str(value)
+        if isinstance(value, dbus.String):
+            return unicode(value)
         elif isinstance(value, dbus.Array):
             return [MPRISWrapper._convert(v) for v in value]
+        elif value is None or \
+                isinstance(value, bool) or \
+                isinstance(value, int) or \
+                isinstance(value, long) or \
+                isinstance(value, float) or \
+                isinstance(value, str) or \
+                isinstance(value, unicode):
+            return value
+        else:
+            raise TypeError("Unknown type '{}'".format(value))
 
     def get_current_metadata(self):
         """returns the metadata of the current track"""
