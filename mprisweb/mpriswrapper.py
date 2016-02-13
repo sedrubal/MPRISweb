@@ -155,6 +155,15 @@ class MPRISWrapper(object):
         """
         return bool(self.player.CanPause) and self.get_can_control()
 
+    def get_volume(self):
+        """:return the current players volume"""
+        return MPRISWrapper._convert(self.player.Volume)
+
+    def set_volume(self, value):
+        """:param value float"""
+        if self.CanControl():
+            self.player.Volume = dbus.Double(value)
+
     def previous(self):
         """jump to previous track"""
         if self.get_can_go_previous():

@@ -61,7 +61,10 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             log("Client sent an invalid message: {0}".format(message),
                 error=True)
             return
-        if not msg['action']:
+        if 'action' not in msg:
+            log("invalid message received from client: '{0}'".
+                format(str(msg)),
+                min_verbosity=2, error=True)
             return
         elif msg['action'] == 'backward':
             APP.mpris_wrapper.previous()
@@ -73,11 +76,23 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             APP.mpris_wrapper.stop()
         elif msg['action'] == 'forward':
             APP.mpris_wrapper.next()
+        elif msg['action'] == 'volume':
+            if 'value' in msg.keys:
+                try:
+                    APP.mpris_wrapper.set_volume(float(msg['value']))
+                except ValueError as err:
+                    log(("Invalid value '{0}' for volume " +
+                         "in message from client: {1}").
+                        format(msg['value'], err.message),
+                        min_verbosity=1, error=True)
+            else:
+                log("Missing value for action 'volume' in message from client",
+                    min_verbosity=1, error=True)
         else:
-            log("invalid action '{0}' received by client".
+            log("invalid action '{0}' received from client".
                 format(msg['action']),
-                error=True)
-        log("received: " + message, min_verbosity=1)
+                min_verbosity=1, error=True)
+        log("received: " + message, min_verbosity=2)
 
     def send_status(self):
         """sends the current and next tracks to the client"""
@@ -95,6 +110,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
                 "canPlay": APP.mpris_wrapper.get_can_play(),
                 "canPause": APP.mpris_wrapper.get_can_pause(),
             },
+            "volume": APP.mpris_wrapper.get_volume(),
         }
         if 'trackMetadata' in msg.keys() and \
                 'artUri' in msg['trackMetadata'].keys() and \

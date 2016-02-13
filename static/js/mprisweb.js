@@ -15,6 +15,10 @@ var playbtn = document.getElementById("play-btn");
 var pausebtn = document.getElementById("pause-btn");
 var stopbtn = document.getElementById("stop-btn");
 var forwardbtn = document.getElementById("forward-btn");
+// volume
+var volumeBars = document.getElementsByClassName("volume-bar");
+var volumeSpans = document.getElementsByClassName("volume-span");
+var volumeConrols = document.getElementsByClassName("volume-control");
 // status
 var statusbadges = document.getElementsByClassName("statusbadge");
 // scroll animation
@@ -70,6 +74,26 @@ function onmessage(evt) {
   } else {
     mediabtndiv.classList.remove("hide");
   }
+  for (var i = 0; i < volumeBars.length; i++) {
+    volumeBars[i].disabled = (message.player.canControl != undefined && !message.player.canControl);
+  }
+
+  if (message.volume != undefined) {
+    for (var i = 0; i < volumeBars.length; i++) {
+      volumeBars[i].value = message.volume;
+    }
+    for (var i = 0; i < volumeSpans.length; i++) {
+      volumeSpans[i].innerHTML = Math.round(message.volume * 100) + "%" ;
+    }
+    for (var i = 0; i < volumeConrols.length; i++) {
+      volumeConrols[i].classList.remove("hide");
+    }
+  } else {
+    for (var i = 0; i < volumeConrols.length; i++) {
+      volumeConrols[i].classList.add("hide");
+    }
+  }
+
   var showBack = true, showFor = true, showPlay = true, showPause = true, enableStop = true;
   if (message.status != undefined) {
     switch (message.status) {

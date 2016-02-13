@@ -84,6 +84,13 @@ div#artimagelayer.contains-image:hover #playstatuslayer * {
   opacity: 1;
 }
 
+.volume-control {
+  margin-top: 2em;
+}
+.volume-control label {
+  width: 100%;
+}
+
 .statusbadge {
   transition: fill .5s;
 }
