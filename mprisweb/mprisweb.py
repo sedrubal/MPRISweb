@@ -49,6 +49,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
     def open(self):
         """when a client connects, add this socket to list"""
         APP.clients.append(self)
+        mpris_prop_change_handler()
         self.send_status()
         log("WebSocket opened. {0} child(s) connected".
             format(len(APP.clients)), min_verbosity=1)
@@ -96,36 +97,8 @@ class WebSocket(tornado.websocket.WebSocketHandler):
 
     def send_status(self):
         """sends the current and next tracks to the client"""
-        msg = {
-            "titles": {
-                "current": APP.mpris_wrapper.get_current_title(),
-                "next": APP.mpris_wrapper.get_next_title(),
-            },
-            "trackMetadata": APP.mpris_wrapper.get_current_metadata(),
-            "status": APP.mpris_wrapper.get_playback_status(),
-            "player": {
-                "canControl": APP.mpris_wrapper.get_can_control(),
-                "canGoNext": APP.mpris_wrapper.get_can_go_next(),
-                "canGoPrevious": APP.mpris_wrapper.get_can_go_previous(),
-                "canPlay": APP.mpris_wrapper.get_can_play(),
-                "canPause": APP.mpris_wrapper.get_can_pause(),
-            },
-            "volume": APP.mpris_wrapper.get_volume(),
-        }
-        if 'trackMetadata' in msg.keys() and \
-                'artUri' in msg['trackMetadata'].keys() and \
-                msg['trackMetadata']['artUri']:
-            arturi = msg['trackMetadata']['artUri'].strip().replace("file://",
-                                                                    '')
-            if arturi and os.path.isfile(arturi):
-                image = base64_encode_image(arturi)
-                if image:
-                    msg['trackMetadata']['art'] = image
-            else:
-                log("Artwork '{0}' won't be displayed: file not found".
-                    format(arturi), min_verbosity=1, error=True)
-        self.write_message(json.dumps(msg), binary=False)
-        log("send: {0}".format(msg), min_verbosity=1)
+        self.write_message(json.dumps(APP.meta_status), binary=False)
+        log("send: {0}".format(APP.meta_status), min_verbosity=3)
 
     def on_close(self):
         """the client of this socket leaved, remove this socket from list"""
@@ -147,7 +120,7 @@ def base64_encode_image(filename):
         log("Artwork '{0}' won't be displayed: {2}".
             format(filename, err.message), min_verbosity=1, error=True)
         return None
-    mimetype = APP.magic.buffer(img).split(';')[0]
+    mimetype = APP.magic.buffer(img).split(';')[0].lower()
     mimere = re.compile(r'(?P<mimetype>image/(png|jpeg|jpg|bmp|gif)).*')
     mimes = mimere.findall(mimetype)
     if len(mimes) == 1:
@@ -168,6 +141,42 @@ def base64_encode_image(filename):
 def mpris_prop_change_handler(*args, **kw):
     """function will be executed on mpris player property changes"""
     log("MPRIS status changed: {0} {1}".format(args, kw), min_verbosity=1)
+    meta = {
+        "titles": {
+            "current": APP.mpris_wrapper.get_current_title(),
+            "next": APP.mpris_wrapper.get_next_title(),
+        },
+        "trackMetadata": APP.mpris_wrapper.get_current_metadata(),
+        "status": APP.mpris_wrapper.get_playback_status(),
+        "player": {
+            "canControl": APP.mpris_wrapper.get_can_control(),
+            "canGoNext": APP.mpris_wrapper.get_can_go_next(),
+            "canGoPrevious": APP.mpris_wrapper.get_can_go_previous(),
+            "canPlay": APP.mpris_wrapper.get_can_play(),
+            "canPause": APP.mpris_wrapper.get_can_pause(),
+        },
+        "volume": APP.mpris_wrapper.get_volume(),
+    }
+    if 'trackMetadata' in meta.keys() and \
+            'artUri' in meta['trackMetadata'].keys() and \
+            meta['trackMetadata']['artUri']:
+        arturi = meta['trackMetadata']['artUri']
+        arturi = arturi.strip().replace("file://", '')
+        if arturi and os.path.isfile(arturi):
+            image = base64_encode_image(arturi)
+            if image:
+                meta['trackMetadata']['art'] = image
+            else:
+                log("Artwork '{0}' won't be displayed: could not open file".
+                    format(arturi), min_verbosity=1, error=True)
+        else:
+            log("Artwork '{0}' won't be displayed: file not found".
+                format(arturi), min_verbosity=3, error=True)
+        del meta['trackMetadata']['artUri']
+    else:
+        log("Track has no Artwork", min_verbosity=4)
+
+    APP.meta_status = meta
     for client in APP.clients:
         client.send_status()
 
