@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# PYTHON_ARGCOMPLETE_OK
 
 """
 Control your musicplayer through the web.
 """
 
-__project__ = "MPRISweb"
-__authors__ = "sedrubal"
-__email__ = "sebastian.endres@online.de",
-__license__ = "GPLv3 & non military"
-__url__ = "https://github.com/sedrubal/" + __project__.lower()
-
+import __init__
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
@@ -22,6 +18,8 @@ import re
 from mpriswrapper import MPRISWrapper
 from helpers import log, parse_args
 
+APP = None
+
 
 class StartPage(tornado.web.RequestHandler):
     """
@@ -31,12 +29,12 @@ class StartPage(tornado.web.RequestHandler):
         """the handler for get requests"""
         self.render(
             "index.html",
-            title=__project__,
-            description=__doc__,
-            author=__authors__,
-            license=__license__,
-            url=__url__,
-            authors_url='/'.join(__url__.split('/')[:-1]),
+            title=__init__.__project__,
+            description=__init__.__doc__,
+            author=__init__.__authors__,
+            license=__init__.__license__,
+            url=__init__.__url__,
+            authors_url='/'.join(__init__.__url__.split('/')[:-1]),
         )
 
     def data_received(self, chunk):
@@ -104,21 +102,9 @@ class WebSocket(tornado.websocket.WebSocketHandler):
             arturi = msg['trackMetadata']['artUri'].strip().replace("file://",
                                                                     '')
             if arturi and os.path.isfile(arturi):
-                mime = magic.open(magic.MAGIC_MIME)
-                mime.load()
-                mimetype = mime.file(arturi)
-                mimere = re.compile(r'(?P<mimetype>image/(png|jpeg|jpg|bmp|gif));.*')
-                mimes = mimere.findall(mimetype)
-                if len(mimes) == 1:
-                    mimetype = mimes[0][0]
-                    img = base64.encodestring(open(arturi, "rb").read())
-                    img = img.replace('\n', '')
-                    img = "data:{mime};base64,{base64}".format(
-                        mime=mimetype, base64=img)
-                    msg['trackMetadata']['art'] = img
-                else:
-                    log("Artwork '{0}' rejected: invalid mimetype {1}".
-                        format(arturi, mimetype), min_verbosity=1, error=True)
+                image = base64_encode_image(arturi)
+                if image:
+                    msg['trackMetadata']['art'] = image
             else:
                 log("Artwork '{0}' won't be displayed: file not found".
                     format(arturi), min_verbosity=1, error=True)
@@ -136,6 +122,33 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         pass
 
 
+def base64_encode_image(filename):
+    """:return the base64 encoded image if filename was a image else None"""
+    try:
+        imgfile = open(filename, "rb")
+        img = imgfile.read(1024)
+    except IOError as err:
+        log("Artwork '{0}' won't be displayed: {2}".
+            format(filename, err.message), min_verbosity=1, error=True)
+        return None
+    mimetype = APP.magic.from_buffer(img).split(';')[0]
+    mimere = re.compile(r'(?P<mimetype>image/(png|jpeg|jpg|bmp|gif)).*')
+    mimes = mimere.findall(mimetype)
+    if len(mimes) == 1:
+        mimetype = mimes[0][0]
+        img += imgfile.read()  # read remeaning file
+        imgfile.close()
+        imgstr = base64.encodestring(img)
+        imgstr = imgstr.replace('\n', '')
+        return "data:{mime};base64,{base64}".format(
+            mime=mimetype, base64=imgstr)
+    else:
+        log("Artwork '{0}' rejected: invalid mimetype '{1}'".
+            format(filename, mimetype), min_verbosity=1, error=True)
+        imgfile.close()
+        return None
+
+
 def mpris_prop_change_handler(*args, **kw):
     """function will be executed on mpris player property changes"""
     log("MPRIS status changed: {0} {1}".format(args, kw), min_verbosity=1)
@@ -144,8 +157,8 @@ def mpris_prop_change_handler(*args, **kw):
 
 
 SETTINGS = {
-    "template_path": os.path.join(os.path.dirname(__file__), "templates"),
-    "static_path": os.path.join(os.path.dirname(__file__), "static"),
+    "template_path": os.path.join(os.path.dirname(__file__), "../templates"),
+    "static_path": os.path.join(os.path.dirname(__file__), "../static"),
 }
 
 
@@ -161,9 +174,14 @@ def make_app():
 
 def main():
     """the main function starts the server"""
+    global APP
+    APP = make_app()
     APP.args = parse_args()
     APP.clients = []  # global list of all connected websocket clients
     APP.mpris_wrapper = MPRISWrapper(mpris_prop_change_handler)
+    log("Loading magic file for mimetypes. Please wait.")
+    APP.magic = magic.Magic(mime=True, uncompress=True)
+    log("Loading finished.", min_verbosity=1)
     APP.listen(APP.args.port, address=APP.args.ip)
     log("App will listen on http://{ip}:{port}".format(
         ip=APP.args.ip, port=APP.args.port))
@@ -171,5 +189,4 @@ def main():
 
 
 if __name__ == "__main__":
-    APP = make_app()
     main()

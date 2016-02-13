@@ -51,6 +51,7 @@ div#artimagelayer,
 div#playstatuslayer {
   transition: height 1s ease-in-out, background 1s ease-in-out;
   background-repeat: no-repeat;
+  background-color: #eee;
 }
 div#artimagelayer {
   color: #333;

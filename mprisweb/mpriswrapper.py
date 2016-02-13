@@ -1,6 +1,7 @@
 """
 Wrapper for MPRIS
 """
+
 from dbus.mainloop.glib import DBusGMainLoop
 import gi.repository.GLib
 import mpris2

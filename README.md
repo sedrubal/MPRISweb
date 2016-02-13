@@ -9,7 +9,9 @@ A simple webinterface for MPRIS using tornado.
 Usage
 -----
 
- - Install: `./setup.py install`
+ - Create virtual environment: `virtualenv --system-site-packages .venv`
+ - Install packages: `pip install -r requirements.txt`
+<!-- - Install: `./setup.py install`-->
  - Run the app: `./mprisweb/mprisweb.py`
  - Go to: [http://localhost:8888/](http://localhost:8888/)
 
