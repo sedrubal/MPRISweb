@@ -73,7 +73,8 @@
         <div class="col-lg-4 col-md-4 col-sm-3 col-xs-1"></div>
         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-10">
           <label>Volume: <span class="volume-span">0%</span>
-            <input class="volume-bar" type="range" min="0.0" max="1.0" step="0.05"></label>
+            <input class="volume-bar" onchange="setVolume(this.value);" type="range" min="0.0" max="1.0" step="0.05">
+          </label>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-3 col-xs-1"></div>
 

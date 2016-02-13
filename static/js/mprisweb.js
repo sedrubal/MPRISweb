@@ -160,32 +160,33 @@ function onclose() {
   }
 }
 
-function send(action) {
-  var message = {
-    "action": action,
-  }
+function send(message) {
   ws.send(JSON.stringify(message));
   console.log(action)
 }
 
 function backward() {
-  send("backward");
+  send({'action': "backward"});
 }
 
 function play() {
-  send("play");
+  send({'action': "play"});
 }
 
 function pause() {
-  send("pause");
+  send({'action': "pause"});
 }
 
 function forward() {
-  send("forward");
+  send({'action': "forward"});
 }
 
 function stop() {
-  send("stop");
+  send({'action': "stop"});
+}
+
+function setVolume(value) {
+  send({'action': "volume", 'value': value});
 }
 
 // preload playstatuslayer background images:

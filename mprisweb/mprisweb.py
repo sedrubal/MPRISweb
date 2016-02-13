@@ -78,7 +78,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         elif msg['action'] == 'forward':
             APP.mpris_wrapper.next()
         elif msg['action'] == 'volume':
-            if 'value' in msg.keys:
+            if 'value' in msg.keys():
                 try:
                     APP.mpris_wrapper.set_volume(float(msg['value']))
                 except ValueError as err:

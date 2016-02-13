@@ -161,7 +161,7 @@ class MPRISWrapper(object):
 
     def set_volume(self, value):
         """:param value float"""
-        if self.CanControl():
+        if self.get_can_control():
             self.player.Volume = dbus.Double(value)
 
     def previous(self):
