@@ -140,7 +140,6 @@ def base64_encode_image(filename):
 
 def mpris_prop_change_handler(*args, **kw):
     """function will be executed on mpris player property changes"""
-    log("MPRIS status changed: {0} {1}".format(args, kw), min_verbosity=1)
     meta = {
         "titles": {
             "current": APP.mpris_wrapper.get_current_title(),

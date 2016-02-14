@@ -6,9 +6,13 @@ from dbus.mainloop.glib import DBusGMainLoop
 import gi.repository.GLib
 import mpris2
 import signal
-import thread
+import time
 from helpers import log
 import dbus
+try:
+    import thread  # TODO use threading
+except ImportError:
+    import _thread as thread
 
 
 class MPRISWrapper(object):
@@ -20,11 +24,15 @@ class MPRISWrapper(object):
         """
         # initialize DBus:
         DBusGMainLoop(set_as_default=True)
-        self.uri = next(mpris2.get_players_uri())
-        self.player = mpris2.Player(dbus_interface_info={'dbus_uri': self.uri})
-        self.player.PropertiesChanged = prop_changed_handler
+        self.prop_changed_handler = prop_changed_handler
+        self.try_connect()
+        if not self.player:
+            log("No MPRIS player available. " +
+                "Please start your favourite music player with MPRIS support.",
+                min_verbosity=0, error=True)
         self.mloop = gi.repository.GLib.MainLoop()
-        thread.start_new_thread(self.loop_thread, ())
+        thread.start_new_thread(self.GLib_loop_thread, ())
+        thread.start_new_thread(self.check_connection_thread, ())
         signal.signal(signal.SIGINT, self.sigint_handler)
 
     def sigint_handler(self, sig, frame):
@@ -34,13 +42,63 @@ class MPRISWrapper(object):
         self.mloop.quit()
         exit(0)
 
-    def loop_thread(self):
+    def GLib_loop_thread(self):
         """
         runs the GLib main loop to get notified about player status changes
         """
         self.mloop.run()
         log("GLib loop exited", min_verbosity=2)
         thread.exit_thread()
+
+    def check_connection_thread(self):
+        """
+        checks if the currently connected player is connected and
+        tries to reconnect if not
+        """
+        while True:
+            time.sleep(5)
+            try:
+                self.player.CanControl
+                # -> AttributeError when None
+                # -> DBusException when not connected anymore
+                # I found no other method to test this
+                # -> better sorry than safe
+                log("Player is still connected", min_verbosity=5)
+            # except AttributeError, dbus.exceptions.DBusException:
+            except (AttributeError, dbus.exceptions.DBusException):
+                log("Player is NOT connected", min_verbosity=5)
+                self.try_connect()
+                self.prop_changed_handler()
+
+    def try_connect(self):
+        """
+        Sets self.player to a player and sets the prop_changed_handler
+        if there is a mpris player on dbus or sets self.player to None
+        """
+        log("Try to connect to player", min_verbosity=4)
+        uris = list(mpris2.get_players_uri())
+        if len(uris):
+            self.player = mpris2.Player(dbus_interface_info={
+                'dbus_uri': uris[0]  # connects to the first player
+            })
+            self.player.PropertiesChanged = self.prop_changed_handler
+            log("Connected to player", min_verbosity=4)
+        else:
+            log("Can't connect. No MPRIS player available",
+                min_verbosity=4, error=True)
+            self.player = None
+
+    def _get_player(self):
+        """:return current player or None if no player is connected"""
+        if self.player is None:
+            return None
+        try:
+            self.player.CanControl
+            # I found no other method to test, if connected
+            # -> better sorry than safe
+            return self.player
+        except dbus.exceptions.DBusException:
+            return None
 
     @staticmethod
     def _convert(value):
@@ -82,7 +140,9 @@ class MPRISWrapper(object):
 
     def get_current_metadata(self):
         """returns the metadata of the current track"""
-        mprismeta = self.player.Metadata
+        if self._get_player() is None:
+            return {}
+        mprismeta = self._get_player().Metadata
         get = lambda x: MPRISWrapper._convert(mprismeta.get(x))
         meta = {
             'album': get(mprismeta.ALBUM),
@@ -112,7 +172,11 @@ class MPRISWrapper(object):
 
     def get_current_title(self):
         """returns the title of the current track"""
-        return self.get_current_metadata()['title']
+        metadata = self.get_current_metadata()
+        if 'title' in metadata.keys():
+            return self.get_current_metadata()['title']
+        else:
+            return ''
 
     def get_next_title(self):
         """returns the title of the next track"""
@@ -123,67 +187,74 @@ class MPRISWrapper(object):
         :return a string representing the current player status:
             (playing|pause|stopped)
         """
-        return str(self.player.PlaybackStatus).lower()
+        if self._get_player() is None:
+            return 'stopped'
+        return str(self._get_player().PlaybackStatus).lower()
 
     def get_can_control(self):
         """
         :return if there is a player that allows to be controled via MPRIS
         """
-        return bool(self.player.CanControl)
+        if self._get_player() is None:
+            return False
+        return bool(self._get_player().CanControl)
 
     def get_can_go_next(self):
         """
         :return if there is a player allows to go to next track via MPRIS
         """
-        return bool(self.player.CanGoNext) and self.get_can_control()
+        return self.get_can_control() and bool(self._get_player().CanGoNext)
 
     def get_can_go_previous(self):
         """
         :return if there is a player allows to go to previous track via MPRIS
         """
-        return bool(self.player.CanGoPrevious) and self.get_can_control()
+        return self.get_can_control() and bool(self._get_player().CanGoPrevious)
 
     def get_can_play(self):
         """
         :return if there is a player that allows to start playing via MPRIS
         """
-        return bool(self.player.CanPlay) and self.get_can_control()
+        return self.get_can_control() and bool(self._get_player().CanPlay)
 
     def get_can_pause(self):
         """
         :return if there is a player that allows to pausing via MPRIS
         """
-        return bool(self.player.CanPause) and self.get_can_control()
+        return self.get_can_control() and bool(self._get_player().CanPause)
 
     def get_volume(self):
         """:return the current players volume"""
-        return MPRISWrapper._convert(self.player.Volume)
+        if self._get_player() is None:
+            return 0
+        return MPRISWrapper._convert(self._get_player().Volume)
 
     def set_volume(self, value):
         """:param value float"""
         if self.get_can_control():
-            self.player.Volume = dbus.Double(value)
+            self._get_player().Volume = dbus.Double(value)
 
     def previous(self):
         """jump to previous track"""
         if self.get_can_go_previous():
-            self.player.Previous()
+            self._get_player().Previous()
 
     def play(self):
         """start playing"""
         if self.get_can_play():
-            self.player.Play()
+            self._get_player().Play()
 
     def stop(self):
         """stop playing"""
-        self.player.Stop()
+        if self.get_can_control():
+            self._get_player().Stop()
 
     def pause(self):
         """pause playing"""
         if self.get_can_pause():
-            self.player.Pause()
+            self._get_player().Pause()
 
     def next(self):
         """jump to the next track"""
         if self.get_can_go_next():
-            self.player.Next()
+            self._get_player().Next()
