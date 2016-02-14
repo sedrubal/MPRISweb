@@ -1,7 +1,6 @@
 /* main functions and websocket handling */
 
 var ws;
-var playstatuslayer = document.getElementById("playstatuslayer");
 var artimagelayer = document.getElementById("artimagelayer")
 var currentTitle = document.getElementById("current");
 var nextTitle = document.getElementById("next");
@@ -19,7 +18,10 @@ var forwardbtn = document.getElementById("forward-btn");
 var volumeBars = document.getElementsByClassName("volume-bar");
 var volumeSpans = document.getElementsByClassName("volume-span");
 var volumeConrols = document.getElementsByClassName("volume-control");
-// status
+// playstatus
+var playstatuslayer = document.getElementById("playstatuslayer");
+var favicons = document.getElementsByClassName("status-favicon")
+// websocket status
 var statusbadges = document.getElementsByClassName("statusbadge");
 // scroll animation
 var banners = document.getElementsByClassName("banner-scroll");
@@ -102,18 +104,27 @@ function onmessage(evt) {
         showPause &= true;
         enableStop &= true;
         playstatuslayer.style.backgroundImage = "url(" + playstatuslayer.dataset.bckgrndPlay + ")";
+        for (var i = 0; i < favicons.length; i++) {
+          favicons[i].href = favicons[i].dataset.iconPlay;
+        }
         break;
       case 'paused':
         showPlay &= true;
         showPause &= false;
         enableStop &= true;
         playstatuslayer.style.backgroundImage = "url(" + playstatuslayer.dataset.bckgrndPause + ")";
+        for (var i = 0; i < favicons.length; i++) {
+          favicons[i].href = favicons[i].dataset.iconPause;
+        }
         break;
       case 'stopped':
         showPlay &= true;
         showPause &= false;
         enableStop &= false;
         playstatuslayer.style.backgroundImage = "url(" + playstatuslayer.dataset.bckgrndStop + ")";
+        for (var i = 0; i < favicons.length; i++) {
+          favicons[i].href = favicons[i].dataset.iconStop;
+        }
         break;
       default:
         console.log("Invalid playback status " + message.status)
@@ -191,9 +202,15 @@ function setVolume(value) {
 
 // preload playstatuslayer background images:
 function preloadStatusImages() {
-  preloadImages([
+  imgs = [
       playstatuslayer.dataset.bckgrndPlay,
       playstatuslayer.dataset.bckgrndPause,
       playstatuslayer.dataset.bckgrndStop
-  ]);
+  ];
+  for (var i = 0; i < favicons.length; i++) {
+    imgs.push(favicons[i].dataset.iconPlay);
+    imgs.push(favicons[i].dataset.iconPause);
+    imgs.push(favicons[i].dataset.iconStop);
+  }
+  preloadImages(imgs);
 }
