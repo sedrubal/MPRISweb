@@ -173,7 +173,7 @@ function onclose() {
 
 function send(message) {
   ws.send(JSON.stringify(message));
-  console.log(action)
+  console.log(message);
 }
 
 function backward() {
