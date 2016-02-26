@@ -76,7 +76,7 @@ div#artimagelayer.contains-image #playstatuslayer * {
 div#artimagelayer.contains-image #playstatuslayer .titles > * {
   background-color: rgba(238, 238, 238, .25);
 }
-div#artimagelayer.contains-image:hover #playstatuslayer {
+body.fullscreen div#artimagelayer.contains-image #playstatuslayer {
   height: 100em;
 }
 div#artimagelayer.contains-image:hover #playstatuslayer * {
@@ -102,6 +102,20 @@ div#artimagelayer.contains-image:hover #playstatuslayer * {
 }
 .statusbadge.statusbadge-ok {
   fill: #279127;
+}
+
+.overlay-bottom {
+  position: fixed;
+  z-index: 10;
+  bottom: 10px;
+  left: 10px;
+}
+
+body.fullscreen #mediabtns {
+  position: fixed;
+  z-index: 10;
+  bottom: 10px;
+  width: 100%;
 }
 
 /*.banner-scroll {

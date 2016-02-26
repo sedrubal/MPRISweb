@@ -65,7 +65,7 @@ function lazy_remove_artimage() {
   // for nicer animations: keep image until layer above is completely faded in
   if (artimages[0].src == "") {
     // indicator, if there is an artimage
-    artimagelayer.style.backgroundImage = "";
+    artimagelayer.style.backgroundImage = "";  // TODO not working
   }
 }
 
@@ -89,4 +89,38 @@ function onWindowResize() {
   h = arr.min() + "px";
   artimagelayer.style.maxHeight = h;
   playstatuslayer.style.maxHeight = h;
+}
+
+function toggleFullscreen() {
+  if (body.classList.contains('fullscreen')) {
+    body.classList.remove('fullscreen');
+    for (var i = 0; i < fullscreenButtons.length; i++) {
+      fullscreenButtons[i].firstElementChild.classList.remove(fullscreenButtons[i].dataset.iconSmall);
+      fullscreenButtons[i].firstElementChild.classList.add(fullscreenButtons[i].dataset.iconFullscreen);
+    }
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  } else {
+    body.classList.add('fullscreen');
+    for (var i = 0; i < fullscreenButtons.length; i++) {
+      fullscreenButtons[i].firstElementChild.classList.remove(fullscreenButtons[i].dataset.iconFullscreen);
+      fullscreenButtons[i].firstElementChild.classList.add(fullscreenButtons[i].dataset.iconSmall);
+    }
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen();
+    } else if (document.documentElement.msRequestFullscreen) {
+      document.documentElement.msRequestFullscreen();
+    } else if (document.documentElement.mozRequestFullScreen) {
+      document.documentElement.mozRequestFullScreen();
+    } else if (document.documentElement.webkitRequestFullscreen) {
+      document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  }
 }

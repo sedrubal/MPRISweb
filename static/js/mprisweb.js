@@ -1,6 +1,8 @@
 /* main functions and websocket handling */
 
 var ws;
+var body = document.getElementsByTagName("body")[0];
+var fullscreenButtons = document.getElementsByClassName("fullscreen-button");
 var artimagelayer = document.getElementById("artimagelayer")
 var currentTitle = document.getElementById("current");
 var nextTitle = document.getElementById("next");
