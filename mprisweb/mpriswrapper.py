@@ -91,7 +91,8 @@ class MPRISWrapper(object):
                 min_verbosity=4, error=True)
             self.player = None
 
-    def _get_player(self):
+    @property
+    def _player(self):
         """:return current player or None if no player is connected"""
         if self.player is None:
             return None
@@ -111,39 +112,30 @@ class MPRISWrapper(object):
         """
         if isinstance(value, dbus.Boolean):
             return bool(value)
-        elif isinstance(value, dbus.Byte) or \
-                isinstance(value, dbus.UInt16) or \
-                isinstance(value, dbus.UInt32) or \
-                isinstance(value, dbus.Int16) or \
-                isinstance(value, dbus.Int32) or \
-                isinstance(value, dbus.Int64):
+        elif isinstance(value,
+                        (dbus.Byte, dbus.UInt16, dbus.UInt32,
+                         dbus.Int16, dbus.Int32, dbus.Int64)):
             return int(value)
         elif isinstance(value, dbus.UInt64):
             return int(value)
         elif isinstance(value, dbus.Double):
             return float(value)
-        elif isinstance(value, dbus.String) or \
-                isinstance(value, dbus.ObjectPath) or \
-                isinstance(value, dbus.Signature):
+        elif isinstance(value, (dbus.String, dbus.ObjectPath, dbus.Signature)):
             return str(value.encode('utf-8').decode('utf-8'))
         if isinstance(value, dbus.String):
             return str(value.encode('utf-8').decode('utf-8'))
         elif isinstance(value, dbus.Array):
             return [MPRISWrapper._convert(v) for v in value]
-        elif value is None or \
-                isinstance(value, bool) or \
-                isinstance(value, int) or \
-                isinstance(value, float) or \
-                isinstance(value, str):
+        elif value is None or isinstance(value, (bool, int, float, str)):
             return value
         else:
             raise TypeError("Unknown type '{}'".format(value))
 
     def get_current_metadata(self):
         """returns the metadata of the current track"""
-        if self._get_player() is None:
+        if self._player is None:
             return {}
-        mprismeta = self._get_player().Metadata
+        mprismeta = self._player.Metadata
 
         def get(prop):
             """wrapper function to get properties"""
@@ -191,75 +183,77 @@ class MPRISWrapper(object):
         :return a string representing the current player status:
             (playing|pause|stopped)
         """
-        if self._get_player() is None:
+        if self._player is None:
             return 'stopped'
-        return str(self._get_player().PlaybackStatus).lower()
+        return str(self._player.PlaybackStatus).lower()
 
     def get_can_control(self):
         """
         :return if there is a player that allows to be controled via MPRIS
         """
-        if self._get_player() is None:
+        if self._player is None:
             return False
-        return bool(self._get_player().CanControl)
+        return bool(self._player.CanControl)
 
     def get_can_go_next(self):
         """
         :return if there is a player allows to go to next track via MPRIS
         """
-        return self.get_can_control() and bool(self._get_player().CanGoNext)
+        return self.get_can_control() and bool(self._player.CanGoNext)
 
     def get_can_go_previous(self):
         """
         :return if there is a player allows to go to previous track via MPRIS
         """
         return self.get_can_control() and \
-            bool(self._get_player().CanGoPrevious)
+            bool(self._player.CanGoPrevious)
 
     def get_can_play(self):
         """
         :return if there is a player that allows to start playing via MPRIS
         """
-        return self.get_can_control() and bool(self._get_player().CanPlay)
+        return self.get_can_control() and bool(self._player.CanPlay)
 
     def get_can_pause(self):
         """
         :return if there is a player that allows to pausing via MPRIS
         """
-        return self.get_can_control() and bool(self._get_player().CanPause)
+        return self.get_can_control() and bool(self._player.CanPause)
 
-    def get_volume(self):
+    @property
+    def volume(self):
         """:return the current players volume"""
-        if self._get_player() is None:
+        if self._player is None:
             return 0
-        return MPRISWrapper._convert(self._get_player().Volume)
+        return MPRISWrapper._convert(self._player.Volume)
 
-    def set_volume(self, value):
+    @volume.setter
+    def volume(self, value):
         """:param value float"""
         if self.get_can_control():
-            self._get_player().Volume = dbus.Double(value)
+            self._player.Volume = dbus.Double(value)
 
     def previous(self):
         """jump to previous track"""
         if self.get_can_go_previous():
-            self._get_player().Previous()
+            self._player.Previous()
 
     def play(self):
         """start playing"""
         if self.get_can_play():
-            self._get_player().Play()
+            self._player.Play()
 
     def stop(self):
         """stop playing"""
         if self.get_can_control():
-            self._get_player().Stop()
+            self._player.Stop()
 
     def pause(self):
         """pause playing"""
         if self.get_can_pause():
-            self._get_player().Pause()
+            self._player.Pause()
 
     def next(self):
         """jump to the next track"""
         if self.get_can_go_next():
-            self._get_player().Next()
+            self._player.Next()

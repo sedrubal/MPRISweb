@@ -83,7 +83,7 @@ class WebSocket(tornado.websocket.WebSocketHandler):
         elif msg['action'] == 'volume':
             if 'value' in msg.keys():
                 try:
-                    APP.mpris_wrapper.set_volume(float(msg['value']))
+                    APP.mpris_wrapper.volume = float(msg['value'])
                 except ValueError as err:
                     log(("Invalid value '{0}' for volume " +
                          "in message from client: {1}").
@@ -157,7 +157,7 @@ def mpris_prop_change_handler(*args, **kw):
             "canPlay": APP.mpris_wrapper.get_can_play(),
             "canPause": APP.mpris_wrapper.get_can_pause(),
         },
-        "volume": APP.mpris_wrapper.get_volume(),
+        "volume": APP.mpris_wrapper.volume,
     }
     if 'trackMetadata' in meta.keys() and \
             'artUri' in meta['trackMetadata'].keys() and \
