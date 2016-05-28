@@ -3,15 +3,18 @@ CLI helperfunctions
 """
 
 from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
 
-import __init__
 import sys
-import ipaddress
 import argparse
+import ipaddress
+from six import text_type
 try:
     import argcomplete
 except ImportError:
     pass
+import mprisweb
 
 VERBOSITY = 0
 
@@ -19,9 +22,9 @@ VERBOSITY = 0
 def ip_addr(value):
     """parse an ip address / checks if the given string is a valid ip"""
     try:
-        return str(ipaddress.ip_address(unicode(value)))
+        return str(ipaddress.ip_address(text_type(value)))
     except ipaddress.AddressValueError as err:
-        raise argparse.ArgumentError(err.message)
+        raise argparse.ArgumentTypeError(err.message)
 
 
 def parse_args(argv=sys.argv[1:]):
@@ -29,7 +32,7 @@ def parse_args(argv=sys.argv[1:]):
     parse cmd line args and
     :return an object containing the args and their values (see argparse doc)
     """
-    parser = argparse.ArgumentParser(description=__init__.__doc__)
+    parser = argparse.ArgumentParser(description=mprisweb.__doc__)
     parser.add_argument(
         '-v',
         dest='verbosity',

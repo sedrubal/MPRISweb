@@ -6,7 +6,9 @@
 Control your musicplayer through the web.
 """
 
-import __init__
+from __future__ import absolute_import
+from __future__ import print_function
+
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
@@ -15,8 +17,9 @@ import json
 import magic
 import base64
 import re
-from mpriswrapper import MPRISWrapper
-from helpers import log, parse_args
+from mprisweb.mpriswrapper import MPRISWrapper
+from mprisweb.helpers import log, parse_args
+import mprisweb
 
 APP = None
 
@@ -29,12 +32,12 @@ class StartPage(tornado.web.RequestHandler):
         """the handler for get requests"""
         self.render(
             "index.html",
-            title=__init__.__project__,
-            description=__init__.__doc__,
-            author=__init__.__authors__,
-            license=__init__.__license__,
-            url=__init__.__url__,
-            authors_url='/'.join(__init__.__url__.split('/')[:-1]),
+            title=mprisweb.__project__,
+            description=mprisweb.__doc__,
+            author=mprisweb.__authors__,
+            license=mprisweb.__license__,
+            url=mprisweb.__url__,
+            authors_url='/'.join(mprisweb.__url__.split('/')[:-1]),
         )
 
     def data_received(self, chunk):
@@ -127,7 +130,7 @@ def base64_encode_image(filename):
         mimetype = mimes[0][0]
         img += imgfile.read()  # read remeaning file
         imgfile.close()
-        imgstr = base64.encodestring(img)
+        imgstr = str(base64.b64encode(img).decode('ascii'))
         imgstr = imgstr.replace('\n', '')
         return "data:{mime};base64,{base64}".format(
             mime=mimetype, base64=imgstr)

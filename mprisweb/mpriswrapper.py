@@ -2,17 +2,20 @@
 Wrapper for MPRIS
 """
 
+from __future__ import unicode_literals
+from __future__ import absolute_import
+
 from dbus.mainloop.glib import DBusGMainLoop
 import gi.repository.GLib
 import mpris2
 import signal
 import time
-from helpers import log
 import dbus
 try:
     import thread  # TODO use threading
 except ImportError:
     import _thread as thread
+from mprisweb.helpers import log
 
 
 class MPRISWrapper(object):
@@ -31,7 +34,7 @@ class MPRISWrapper(object):
                 "Please start your favourite music player with MPRIS support.",
                 min_verbosity=0, error=True)
         self.mloop = gi.repository.GLib.MainLoop()
-        thread.start_new_thread(self.GLib_loop_thread, ())
+        thread.start_new_thread(self.glib_loop_thread, ())
         thread.start_new_thread(self.check_connection_thread, ())
         signal.signal(signal.SIGINT, self.sigint_handler)
 
@@ -42,7 +45,7 @@ class MPRISWrapper(object):
         self.mloop.quit()
         exit(0)
 
-    def GLib_loop_thread(self):
+    def glib_loop_thread(self):
         """
         runs the GLib main loop to get notified about player status changes
         """
@@ -116,24 +119,22 @@ class MPRISWrapper(object):
                 isinstance(value, dbus.Int64):
             return int(value)
         elif isinstance(value, dbus.UInt64):
-            return long(value)
+            return int(value)
         elif isinstance(value, dbus.Double):
             return float(value)
-        elif isinstance(value, dbus.UTF8String) or \
+        elif isinstance(value, dbus.String) or \
                 isinstance(value, dbus.ObjectPath) or \
                 isinstance(value, dbus.Signature):
-            return str(value)
+            return str(value.encode('utf-8').decode('utf-8'))
         if isinstance(value, dbus.String):
-            return unicode(value)
+            return str(value.encode('utf-8').decode('utf-8'))
         elif isinstance(value, dbus.Array):
             return [MPRISWrapper._convert(v) for v in value]
         elif value is None or \
                 isinstance(value, bool) or \
                 isinstance(value, int) or \
-                isinstance(value, long) or \
                 isinstance(value, float) or \
-                isinstance(value, str) or \
-                isinstance(value, unicode):
+                isinstance(value, str):
             return value
         else:
             raise TypeError("Unknown type '{}'".format(value))
@@ -143,7 +144,10 @@ class MPRISWrapper(object):
         if self._get_player() is None:
             return {}
         mprismeta = self._get_player().Metadata
-        get = lambda x: MPRISWrapper._convert(mprismeta.get(x))
+
+        def get(prop):
+            """wrapper function to get properties"""
+            return MPRISWrapper._convert(mprismeta.get(prop))
         meta = {
             'album': get(mprismeta.ALBUM),
             'albumArtist': get(mprismeta.ALBUM_ARTIST),
@@ -209,7 +213,8 @@ class MPRISWrapper(object):
         """
         :return if there is a player allows to go to previous track via MPRIS
         """
-        return self.get_can_control() and bool(self._get_player().CanGoPrevious)
+        return self.get_can_control() and \
+            bool(self._get_player().CanGoPrevious)
 
     def get_can_play(self):
         """

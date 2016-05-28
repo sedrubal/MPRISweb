@@ -4,3 +4,4 @@ mpris2
 argparse
 argcomplete
 file-magic
+six

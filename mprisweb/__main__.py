@@ -5,8 +5,11 @@
 The main entry point.
 """
 
+from __future__ import absolute_import
+from __future__ import print_function
+
 import sys
-from mprisweb import main
+from mprisweb.mprisweb import main
 
 print("[!] ATTENTION:")
 print("[!] ==========")
