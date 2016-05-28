@@ -6,6 +6,8 @@ Control your musicplayer through the web.
 
 A simple webinterface for MPRIS using tornado.
 
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/e3fd832e2c1a4961bb42a916e1bbeed0/badge.svg)](https://www.quantifiedcode.com/app/project/e3fd832e2c1a4961bb42a916e1bbeed0)
+
 Usage
 -----
 
